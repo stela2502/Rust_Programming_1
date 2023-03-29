@@ -1,0 +1,56 @@
+# Variables
+
+Rust uses strong typed variables. This does mean that you need to define your variables as a specific type.
+So if you want to store and integer value you can choose between the types u8, u16, u32, u64, u128, i8, i16, i32, i64, i128, usize and integer.
+All of these types can not be compared against each other. So if you want to create some data structures it does help to choose the same type for the data. The difference between the integer types are the range of values they can contain: u8 and i8 are 8 bit long whereas u128 and i128 are 128 bit long. Usize is the default integer type and is dependent on your computer type. On 64 bit computers it is the same as a u64 - but you still can not compare it directly to u64.
+
+# Examples
+
+For now we will use the extendr package to make this run in Rmd:
+
+```{ r eval=FALSE}
+remotes::install_github("extendr/rextendr")
+```
+
+And now we can actually look into what the variables contain:
+
+```{extendr}
+let x = 5;
+let y = 7;
+let z = x*y;
+
+rprintln!("{x} * {y} = {z}");
+```
+
+And now lets break that:
+
+```
+let x:u8 = 5;
+let y:u16 = 7;
+let z = x*y;
+
+println!("{x} * {y} = {z}");
+```
+
+I unfortunately can not show the error message here as the bookdown process dies if the compile did not work. So now you would need to try to get the compiler error yourself:
+
+1. Create a new Rust program 
+
+```{r , include = FALSE, eval=FALSE}
+unlink( 'workshop', recursive=TRUE )
+```
+
+```{bash, eval=FALSE}
+cargo new workshop --bin
+```
+
+Open the created file "workshop/srv/main.rs" and replace the "println!("Hello, world!");" with the wrong code we had before.
+
+```{bash,  error=TRUE}
+cd workshop
+cargo build -r
+```
+
+
+
+

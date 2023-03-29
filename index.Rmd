@@ -1,0 +1,58 @@
+--- 
+title: "An introduction to Rust programming"
+author: "Stefan Lang"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+#output: bookdown::gitbook
+#output:
+#  bookdown::html_book:
+#    theme: flatly
+#    code_folding: hide
+output:
+  html_document:
+    code_folding: show
+
+documentclass: book
+bibliography: [book.bib, packages.bib]
+biblio-style: apalike
+link-citations: yes
+github-repo: rstudio/bookdown-demo
+description: "This worksdhop should teach Rust at an already quite advanced level. Previous programming skills are recommended!"
+---
+
+```{r setup, include = FALSE}
+if (! require('rextendr') ){
+  remotes::install_github("extendr/rextendr")
+}
+library(rextendr)
+```
+
+# Introduction
+
+The purpose of this course is to teach you how to create a Rust program from scratch. You will learn about the basics of Rust programming the Rust compiler and the Rust class system. This will be hard if your only programming experience comes from R and Python ;-)
+
+First of all there is no interactive mode in Rust like there is in R and Python. Rust is no scripting language - you need to compile your program before you can use it.
+
+## Practice makes perfect
+
+Programming is like any skill, the more you practice the better you get. ***It's really important that you keep using what you have learned after the course is completed*** otherwise there is a good chance you will forget everything and you'll be back to square one.
+
+## Why Use Rust?
+
+You should only use Rust if a process you frequently use takes a lot of time. Rust in general is easily 10 times faster than R or Python. In general you can compare Rust with C and C++, but programming in Rust is WAY easier than programming in C or C++.
+
+Why? Because the Rust compiler is a work of art. We will come to that - soon!
+
+## How will this course work?
+
+Rust is OS independent - meaning you all will install it on your computer. Please follow these steps to install it on your system: [https://www.rust-lang.org/tools/install ](https://www.rust-lang.org/tools/install).
+
+This document contains code sniplets that will help you getting started, but you will do the coding in a programming IDE. I am working with [Sublime Text](https://www.sublimetext.com/), but you are welcome to use whichever us to your liking. We will use the terminal to compile and run our programs. I recommend you to use git to store your code. Please create a github or gitlab account. 
+
+
+```{r include=FALSE}
+# automatically create a bib database for R packages
+knitr::write_bib(c(
+  .packages(), 'bookdown', 'knitr', 'rmarkdown'
+), 'packages.bib')
+```
