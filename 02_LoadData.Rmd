@@ -1,0 +1,11 @@
+# How do you get data into Rust
+
+This one was quite a problem for me. I'll just tell you - just copy paste the solution - I do the same.
+
+Lets look into the folder 'read_data'. This package actually not only contains a main.rs, but also a lib.rs and data.rs. The lib.rs is the file where all library files in your package are defined. And all other files can be included there. Just follow the example.
+
+I actually have copied the library file from my simulated_anealing Rust project. You will also implement something like that in Rust at the end and I hope this little primer brings you up to speed now.
+
+Let's dig through the library.
+
+

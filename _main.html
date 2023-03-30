@@ -507,14 +507,14 @@ still can not compare it directly to u64.</p>
 let y = 7;
 let z = x*y;
 
-rprintln!(&quot;{x} + {y} = {z}&quot;);</code></pre>
-<pre><code>## 5 + 7 = 35</code></pre>
+rprintln!(&quot;{x} * {y} = {z}&quot;);</code></pre>
+<pre><code>## 5 * 7 = 35</code></pre>
 <p>And now lets break that:</p>
 <pre><code>let x:u8 = 5;
 let y:u16 = 7;
 let z = x*y;
 
-println!(&quot;{x} + {y} = {z}&quot;);</code></pre>
+println!(&quot;{x} * {y} = {z}&quot;);</code></pre>
 <p>I unfortunately can not show the error message here as the bookdown
 process dies if the compile did not work. So now you would need to try
 to get the compiler error yourself:</p>
@@ -554,6 +554,49 @@ cargo build -r</code></pre>
 ## Some errors have detailed explanations: E0277, E0308.
 ## For more information about an error, try `rustc --explain E0277`.
 ## error: could not compile `workshop` due to 2 previous errors</code></pre>
+<p>That was fun.</p>
+</div>
+<div id="a-small-rust-program-with-a-function" class="section level1">
+<h1>A small Rust program with a function</h1>
+<p>Now we need to dig deeper and I recommend you to use your programming
+IDE of choice to look into an broken program. Rstudio would also do.</p>
+<p>So lets look in the simple_problem folder in <a href="https://github.com/stela2502/Rust_Programming_1">this github
+repo</a>.</p>
+<p>Download (clone) the repo using git. Open the folder ‘simple_problem’
+in your IDE and open a terminal and cd into this folder.</p>
+<p>There you run:</p>
+<pre class="bash"><code>cargo build -r</code></pre>
+<p>It is almost no fun hiding programming erros as the compiler will
+already tell you what to do - right? I think this will be fun…</p>
+<div id="problem-1" class="section level2">
+<h2>Problem 1</h2>
+<p>Each line needs to end with a ‘;’. All but the last line in a
+function if you want to return a value.</p>
+</div>
+<div id="promblem-2" class="section level2">
+<h2>Promblem 2</h2>
+<p>We do not have a ‘data’ variable in the sum function. Here the data
+is called ‘v’ - fix that.</p>
+<p>Now the code compiles:</p>
+<pre class="bash"><code>cargo build -r
+target/release/simple_problem</code></pre>
+<p>Does the output make sense?</p>
+</div>
+<div id="problem-3" class="section level2">
+<h2>Problem 3</h2>
+<p>No it is wrong: We need to switch the variables in the println!
+function.</p>
+</div>
+<div id="problem-4" class="section level2">
+<h2>Problem 4</h2>
+<p>Wait - we tried to sum up the values 6, 7, 8 and 9 - that is not 10?!
+How do you fix that?</p>
+<p>This one is rather complicated, but I am sure you will be able to
+find out - right?</p>
+</div>
+</div>
+<div id="a-short-break" class="section level1">
+<h1>A short break</h1>
 <!--chapter:end:01_Variables.Rmd-->
 </div>
 

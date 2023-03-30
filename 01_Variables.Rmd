@@ -51,6 +51,51 @@ cd workshop
 cargo build -r
 ```
 
+That was fun. 
 
+# A small Rust program with a function
+
+Now we need to dig deeper and I recommend you to use your programming IDE of choice to look into an broken program. Rstudio would also do.
+
+So lets look in the simple_problem folder in [this github repo](https://github.com/stela2502/Rust_Programming_1).
+
+Download (clone) the repo using git. Open the folder 'simple_problem' in your IDE and open a terminal and cd into this folder.
+
+There you run:
+```{bash, eval=F}
+cargo build -r
+```
+
+It is almost no fun hiding programming erros as the compiler will already tell you what to do - right?
+I think this will be fun...
+
+## Problem 1
+
+Each line needs to end with a ';'. All but the last line in a function if you want to return a value.
+
+## Promblem 2
+
+We do not have a 'data' variable in the sum function. Here the data is called 'v' - fix that.
+
+Now the code compiles:
+```{bash, eval=F}
+cargo build -r
+target/release/simple_problem
+```
+
+Does the output make sense?
+
+## Problem 3
+
+No it is wrong: We need to switch the variables in the println! function.
+
+## Problem 4
+
+Wait - we tried to sum up the values 6, 7, 8 and 9 - that is not 10?!
+How do you fix that?
+
+This one is rather complicated, but I am sure you will be able to find out - right?
+
+# A short break
 
 
