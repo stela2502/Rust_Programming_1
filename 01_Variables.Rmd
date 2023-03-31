@@ -2,7 +2,9 @@
 
 Rust uses strong typed variables. This does mean that you need to define your variables as a specific type.
 So if you want to store and integer value you can choose between the types u8, u16, u32, u64, u128, i8, i16, i32, i64, i128, usize and integer.
-All of these types can not be compared against each other. So if you want to create some data structures it does help to choose the same type for the data. The difference between the integer types are the range of values they can contain: u8 and i8 are 8 bit long whereas u128 and i128 are 128 bit long. Usize is the default integer type and is dependent on your computer type. On 64 bit computers it is the same as a u64 - but you still can not compare it directly to u64.
+All of these types can not be compared against each other. So if you want to create some data structures it does help to choose the same type for the data. 
+The difference between the integer types are the range of values they can contain: u8 and i8 are 8 bit long whereas u128 and i128 are 128 bit long. 
+Usize is the default integer type and is dependent on your computer type. On 64 bit computers it is the same as a u64 - but you still can not compare it directly to u64.
 
 # Examples
 
@@ -55,7 +57,7 @@ That was fun.
 
 # A small Rust program with a function
 
-Now we need to dig deeper and I recommend you to use your programming IDE of choice to look into an broken program. Rstudio would also do.
+Now we need to dig deeper and I recommend you to use your programming IDE of choice to look into a broken program. Rstudio would also do.
 
 So lets look in the simple_problem folder in [this github repo](https://github.com/stela2502/Rust_Programming_1).
 
@@ -67,7 +69,7 @@ cargo build -r
 ```
 
 It is almost no fun hiding programming erros as the compiler will already tell you what to do - right?
-I think this will be fun...
+I think this nevertheless will be fun...
 
 ## Problem 1
 
@@ -95,6 +97,34 @@ Wait - we tried to sum up the values 6, 7, 8 and 9 - that is not 10?!
 How do you fix that?
 
 This one is rather complicated, but I am sure you will be able to find out - right?
+
+
+# Tests in Rust
+
+Rust has a nice way to test scripts and libraryies:
+Add this to the script
+
+```
+#[cfg(test)]
+mod tests {
+    use crate::sum;
+    #[test]
+    fn check_sum() {
+      
+      let data:Vec<usize> = vec![1,2,3,4,5,6,7,8,9];
+      let ids:Vec<usize> = vec![5,6,7,8];
+      
+    	assert_eq!( sum( &data, &ids ), 30 );
+    }
+}
+```
+
+And now you can test your script by 
+
+```
+cargo test -r
+```
+
 
 # A short break
 

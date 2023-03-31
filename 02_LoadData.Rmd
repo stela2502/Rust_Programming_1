@@ -1,11 +1,146 @@
 # How do you get data into Rust
 
-This one was quite a problem for me. I'll just tell you - just copy paste the solution - I do the same.
+Getting data into a compiled langue has always been a problem for me.
+Hence I'll tell you how I finally managed to get data into Rust - just copy paste the solution - I do the same.
 
-Lets look into the folder 'read_data'. This package actually not only contains a main.rs, but also a lib.rs and data.rs. The lib.rs is the file where all library files in your package are defined. And all other files can be included there. Just follow the example.
+Lets look into the folder 'read_data'. 
+This Rust package actually not only contains a main.rs, but also a lib.rs and data.rs. 
+The lib.rs is the file where all library files in your package are defined. 
+And all other files can be included there. Just follow the example.
 
-I actually have copied the library file from my simulated_anealing Rust project. You will also implement something like that in Rust at the end and I hope this little primer brings you up to speed now.
+I actually have copied the library file from my simulated_anealing Rust project. 
+You will also implement something like that in Rust at the end and I hope this little primer brings you up to speed now.
 
 Let's dig through the library.
 
 
+Start with the main.rs file. This is what will be compiled to be the executable. The program starts with the main function.
+
+The top 7 lines load libraries with line 7 loading the included Data class.
+
+The following structure is a way to get command line options into the program. This struct 'Opts' defines the command line options available for this program.
+We have here a data which is a String and contains a default value (out test dataset) and a 'sep' that is a default '\t' here as the Spellman_Yeast_Cell_Cycle.csv table is actually tab separated.
+
+
+
+The main function first starts a timer (I think it is useful most of the times) and reads the command line option in.
+The '\t' has been a little buit a problem for me and here you see my solution to that.
+
+All the Main really does here is to load the data with the line ``let data = Data::read_file( &opts.data, sep)``.
+And print the contents with the next line. Afterwards there is a lot of time calculation and a statement how long the process did take.
+
+So all the fun has to be coded somewhere else.
+
+Let's look into the lib.rs file.
+
+```
+pub mod data;
+```
+
+Oh that is boring. It only imports the thingsfrom data.rs...
+
+# The Data class
+
+A class in Rust is defined by creating the data structure for the class (struct Data {}) and then implementing functions for the class (impl Data {}).
+Functions can be defined with 
+
+```
+fn <function name> (<variables>) -> <return value> { 
+	<code> 
+} 
+```
+
+Lets look into the new function:
+
+```
+pub fn new( rows:usize, cols:usize, data: Vec::<f64>, rownames: Vec::<String> ) -> Self {
+
+	let ret = Array::from_iter(&mut data.iter().cloned());
+	let data = ret.into_shape([rows, cols]).unwrap();
+	let store = Array::default((rows, rows));
+	let total_energy =  vec![0.0; rows];
+
+	Self {
+		rows, 
+		cols,
+		rownames,
+		data,
+		total_energy,
+		store,
+	}
+}
+```
+
+Here we define the class contents and return a Self object.
+
+The read_file funciton is more interesting as it contains an example of how Rust handles errors: 
+
+```
+match line {
+    Ok(line) => {
+    	.
+    	.
+    	.
+    },
+    Err(err) => {
+        panic!("Unexpected error reading the csv file: {err:?}");
+    }
+}
+```
+
+The 'line' object is one line in the data file and the function I used to get this data returns a 'Result' - meaning it is normal that thif function might not work.
+And this is the common way to treat a Result. You can also stack these as you can see in the previousely hidden code of the function:
+
+```
+header =true;
+for mut val in line.split( sep ).collect::<Vec<&str>>(){
+    if header{
+        names.push( val.to_string() );
+        header = false;
+    }else {
+    	val = val.trim();
+        let v = match val.parse::<f64>() {
+            Ok( v ) => v,
+            Err(_err) => {
+                match val.parse::<usize>(){
+                    Ok(v) =>  { 
+                        v as f64
+                    },
+                    Err(err) => {
+                        eprintln!("I could not parse '{val}' to usize or f64 {err:?}");
+                        0.0
+                    },
+                }
+            },
+        };
+        arr.push( v );
+    }
+}
+```
+
+What does this 'mut' mean? Rust differentiates between variables you only store a value in once and variables that you can modify.
+So whenever you want to asigne a value to a variable more than once you need to declare the variable as mut.
+It also does not allow access to a variable in more than one function.
+
+```
+for mut val in line.split( sep ).collect::<Vec<&str>>()
+```
+
+Translates to: split the line by 'sep' and give me ownership of the variables you create as Vec<&str> and iterate over the variables in the vector that I want to be able to modify.
+
+Where do we modify the value? ``val = val.trim();`` does remove whitespace from the strings. This is necessary as " 2" can not be parsed as 2:<usize>. Tried that and it broke ;-)
+Rust also does not want to parse an int as float and vice versa. So therfore I need to differentiate between the two options here. 
+
+
+I assume you can see what is going on here? What does this function do?
+
+
+# Excercise  
+
+Try to use this example and implement a kmeans algorithm based on the Data class from the last example.
+The kmeans function should be defined in the Data class and the input to this function should be the Data class itself.
+You can then change the 'data' variable to &self in the function and to self.data in the function body.
+
+I assume it is bad habbit to just add the two other functions there, too, but just do it for now. We are not hard core programmers after all :-D
+
+Make the kmeans function public and call it in the main.rs script. You need to add tow additional values to the options. 

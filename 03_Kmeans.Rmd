@@ -1,11 +1,12 @@
 # Use the Data class to implement a kmeans algorithm
 
-Honestly - nowadays I never start anything without asking ChatGPT.
+Honestly - nowadays I never start anything without asking ChatGPT first.
 So why not use it here, too.
 
 
+This is my conversation with ChatGPT:
+
 ```
-stefan.lang@med.lu.se
 Hi Chatgpt. Can you tell me how to code kmeans in Rust if the data is stored in 2d ndarrays  and the rows should be clustered.
 
 Sure, I can help you with that! Here's an implementation of the KMeans algorithm in Rust using the ndarray crate to handle the 2D data:
@@ -69,4 +70,219 @@ The implementation should be fairly self-explanatory, but I'll provide some addi
 Hope that helps! Let me know if you have any questions.
 ````
 
-Sure - why not. But the Data obejct does not use an Array2. How to fix that? I am interested in your results :-D
+Sure - why not. Let's recapitulate what the kmers algorithm should do and check if we find the respective lines in the code.
+
+The data should already be in memory and the data should be a ndarray. Here it is obviously called "data". But I would not like to have an Array2<f64> back.
+This data should rather be a Vec<usize>. Keep that in mind for later.
+
+Next in the kmeans algorithm is to select a random set of initial 'centers'. This step is totally missing here.
+We need a random number generator here:
+
+```
+use rand::Rng;
+let mut rng = rand::thread_rng();
+rng.gen_range(0..100); // gives a random number in this range.
+```
+
+Next we loop until convergence is reached. That is not good. We do not want the program to end in an endless loop. Add another variable called max_it:usize adn use this in a for loop.
+
+
+# Let's walk through:
+
+## Change the data type, the return value and add a way to select the initial set of centroids.
+
+
+```
+use ndarray::ArrayBase;
+use rand::Rng;
+
+
+fn kmeans(data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, k: usize) -> Vec<usize> {
+    let n = data.nrows();
+    let d = data.ncols();
+    let mut rng = rand::thread_rng();
+
+    let mut centroids = Array::zeros((k, data.len_of(Axis(1))));
+    for i in  0..k{
+        let sample_idx = rng.gen_range(0..n);
+        centroids.row_mut(i).assign(&self.data.row(sample_idx));
+    }
+    let mut labels = Vec<usize>::with_capacity(n);
+
+    .
+    .
+    .
+}
+```
+
+## Should we have more functions?
+
+Now we would select the labels - a vector stating the closest 'centroid' for each row of the data.
+This function should compare the centroids to every row of the data.
+
+
+```
+use ndarray::ArrayBase;
+use rand::Rng;
+
+
+fn asign_labels(data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, centroids: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>> ) -> Vec<usize> {
+    let n = data.nrows();
+    let mut labels = Vec<usize>::with_capacity( n );
+    
+    for id in 0..n{
+        let mut min_distance = f64::INFINITY;
+        for j in 0..k {
+            let distance = (data.slice(s![i, ..]) - centroids.slice(s![j, ..])).norm();
+            if distance < min_distance {
+                min_distance = distance;
+                labels[[i, 0]] = j;
+            }
+        }
+    }
+    labels
+}
+
+fn kmeans(data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, k: usize) -> Vec<usize> {
+    let n = data.nrows();
+    let d = data.ncols();
+    let mut rng = rand::thread_rng();
+
+    let mut centroids = Array::zeros((k, data.len_of(Axis(1))));
+    for i in  0..k{
+        let sample_idx = rng.gen_range(0..n);
+        centroids.row_mut(i).assign(&self.data.row(sample_idx));
+    }
+    let mut labels = asign_labels( data, centroids );
+
+    .
+    .
+    .
+}
+
+```
+
+
+## Add a function to calculate the centroids
+
+The next time we get the centroids will be more complicated.
+I like functions as one could also create specific tests for each function.
+
+
+```
+use ndarray::ArrayBase;
+use rand::Rng;
+
+
+fn asign_labels(data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, centroids: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>> ) -> Vec<usize> {
+    let n = data.nrows();
+    let mut labels = Vec<usize>::with_capacity( n );
+    
+    for id in 0..n{
+        let mut min_distance = f64::INFINITY;
+        for j in 0..k {
+            let distance = (data.slice(s![i, ..]) - centroids.slice(s![j, ..])).norm();
+            if distance < min_distance {
+                min_distance = distance;
+                labels[[i, 0]] = j;
+            }
+        }
+    }
+    labels
+}
+
+fn calculate_centroids( data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, labels:Vec<usize>, 
+            k:usize, &mut centroids: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>> ) {
+
+    for j in 0..k {
+        let mask = labels.iter().enumerate().filter(|(_, &l)| l == j )
+            .map(|(i, _)| i).collect::<Vec<_>>();
+        let cluster_data = data.select(Axis(0), &mask);
+        if !cluster_data.is_empty() {
+            centroids.slice_mut(s![j, ..]).assign(&cluster_data.mean_axis(Axis(0)).unwrap());
+        }
+    } 
+}
+
+fn kmeans(data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, k: usize, max_it:usize) -> Vec<usize> {
+    let n = data.nrows();
+    let d = data.ncols();
+    let mut rng = rand::thread_rng();
+
+    let mut centroids = Array::zeros((k, data.len_of(Axis(1))));
+    for i in  0..k{
+        let sample_idx = rng.gen_range(0..n);
+        centroids.row_mut(i).assign(&self.data.row(sample_idx));
+    }
+    let mut labels = asign_labels( data, centroids );
+
+    for it in 0..max_it{
+        calculate_centroids( data, labels, k, centroids );
+        let new_labels = asign_labels( data, centroids );
+        if new_labels == labels{
+            print("converged after {it} itherations");
+            break;
+        }
+        labels = new_labels;
+    }
+    labels
+}
+
+```
+
+
+# And the TESTING!
+
+
+As we now have so many nice functions that could be tested - lets add some tests:
+
+
+Oh - now we actually neeed some data in this. :-(
+
+Let's combine the kmeans with the Data object we had as an example before.
+
+Copy the read_data folder and name it kmeans.
+Now you need to change the Cargo.toml: read_data -> kmeans.
+
+You could compile it and check if it is working.
+
+Add the kmeans functionality to the Data class or to the main.rs script.
+This will take some time - I will help you, but there will be no help in this document.
+
+We go on weith the testing here:
+
+
+```
+
+#[cfg(test)]
+mod tests {
+
+    use crate::data::Data;
+    use ndarray::Axis;
+
+    #[test]
+    fn check_kmeans() {
+
+        let mut data = Data::read_file( &"testData/CellexalVR_TestData_tsne.csv".to_string(), ',' );
+        data.scale();
+        let kmeans = data.kmeans( 15, 15000 );
+        assert_eq!( kmeans.len(), data.data.len_of(Axis(0)) );
+
+        let exp:Vec<usize> = vec![0; data.data.len_of(Axis(0)) ];
+        assert!( kmeans != exp, "the kmeans values are not zero" );
+    }
+
+    #[test]
+    fn check_calculate_centroids() {
+
+    }
+
+    #[test]
+    fn check_asign_labels() {
+
+    }
+
+}
+
+```
+
