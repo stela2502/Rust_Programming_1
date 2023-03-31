@@ -6,7 +6,12 @@ use std::io::BufRead;
 use ndarray::prelude::*;
 use ndarray::ViewRepr;
 //use std::collections::BTreeMap;
-
+use rand::Rng;
+use ndarray::Axis;
+use std::fs::File;
+use std::error::Error;
+use ndarray::OwnedRepr;
+use csv::WriterBuilder;
 
 #[derive(Debug)]
 pub struct Data{
@@ -61,7 +66,7 @@ impl Data {
 	        }
 	    }
 	    rows -=1;
-	    println!("I got {rows} rows and {cols} cols in this data"  );
+	    eprintln!("I got {rows} rows and {cols} cols in this data"  );
 
 	    let mut arr  = Vec::<f64>::with_capacity( cols * rows );
 	    let mut names = Vec::<String>::with_capacity( cols );
@@ -113,6 +118,93 @@ impl Data {
 	    Self::new( rows, cols, arr,  names )
 	}
 
+	fn calculate_centroids(&self, ids:&Vec<usize>, k:usize ) -> ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>> {
+
+		let mut centroids = Vec::<f64>::with_capacity(k * self.data.len_of(Axis(1)));
+		for cluster_id in 0..k{
+			let indices = ids.iter().enumerate().filter(|(_, id)| **id == cluster_id).map(|(i, _)| i).collect::<Vec<_>>();
+	   		//println!("The indices I want to select {indices:?}");
+	   		let points = self.data.select(Axis(0), &indices);
+	   		//println!("This is the points for the centroid {cluster_id}: {points:?}");
+	   		for i in 0..points.len_of(Axis(1)){
+	   			centroids.push( points.column(i).sum() /  points.len_of(Axis(0)) as f64);
+	   		}
+	   		//println!("Axis(0) {}, Axis(1) {}: and that are the centroids I calczulated: {},{},{}",points.len_of(Axis(0)),points.len_of(Axis(1)), centroids[cluster_id *3], centroids[cluster_id*3+1], centroids[ cluster_id*3+2 ] );
+		}
+		//print!(".");
+		Array::from_iter(&mut centroids.iter().cloned()).into_shape([k, self.data.len_of(Axis(1)) ]).unwrap()
+	}
+
+	fn min_distance( &self, centroids: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>> ) -> Vec<usize>{
+
+		let mut new_labels = Vec::<usize>::with_capacity( self.data.len_of(Axis(0)) as usize) ;
+
+		let mut distances:Vec<f64> = vec![0.0; centroids.len_of(Axis(0)) as usize];
+		for data_id in 0..self.data.len_of(Axis(0)){
+			for centroid_id in 0..centroids.len_of(Axis(0)){
+				distances[centroid_id] =  Data::euclidean_distance(self.data.index_axis(Axis(0), data_id), centroids.index_axis(Axis(0), centroid_id ));
+			}
+
+			let mut min = f64::MAX;
+			let mut id = 0;
+			for centroid_id in 0..centroids.len_of(Axis(0)){
+				if min > distances[centroid_id]{
+					min = distances[centroid_id];
+					id = centroid_id;
+				}
+			}
+			// if data_id < 2{
+			// 	eprintln!("I got these min distances for cell {data_id}: {distances:?}");
+			// 	eprintln!("And have decided that {id} is the closest");
+			// }
+			
+			new_labels.push(id);
+		}
+		new_labels
+	}
+
+
+	pub fn kmeans(&self, k: usize, max_it: usize ) ->Vec<usize> {
+	    let n = self.data.len_of(Axis(0)) as usize;
+
+	    let mut rng = rand::thread_rng();
+
+	    let mut centroids = Array::zeros((k, self.data.len_of(Axis(1))));
+    	
+    	for i in 0..k {
+        	let sample_idx = rng.gen_range(0..n);
+        	centroids.row_mut(i).assign(&self.data.row(sample_idx));
+    	}
+
+	    let mut labels:Vec<usize> = self.min_distance(&centroids);
+
+		//println!("These are my new labels: {:?}", labels);
+	    let mut it = 0;
+
+	    loop {
+	    	centroids = self.calculate_centroids(&labels, k);
+	        let new_labels = self.min_distance(&centroids);
+
+	        if new_labels == labels || it == max_it{
+	        	eprintln!("finished after {it} iterations");
+	            break;
+	        }
+	        it +=1;
+
+	        labels = new_labels;
+	        
+	        
+	        //println!("My centroids:\n({centroids:?})")
+	    }
+	    match Data::to_csv( &centroids, format!("testData/centroid.csv"), b','){
+	    	Ok(_) => (),
+	    	Err(e) => {
+	    		eprintln!("The centroid data could not be written to file testData/centroid.csv: {e:?}");
+	    	}
+	    }
+	    labels
+	}
+
 	// fn sum ( data: &ArrayBase<ViewRepr<&mut f64>, Dim<[usize; 1]>> ) -> f64 {
 	// 	let mut sum = 0.0;
 	// 	for val in data{
@@ -146,15 +238,15 @@ impl Data {
 			row -= Self::min( &row );
 			row /= Self::max( &row );
 		}
-		println!("precalculate the distances between genes");
-		for i in 0..self.rows {
-	        for j in i+1..self.rows {
-	            let dist = Data::euclidean_distance(self.data.index_axis(Axis(0), i), self.data.index_axis(Axis(0), j));
-	            self.store[[i,j]] = dist;
-	            self.store[[j,i]] = dist;
-	        }
-	    }
-	    println!("Finished");
+		// println!("precalculate the distances between genes");
+		// for i in 0..self.rows {
+	    //     for j in i+1..self.rows {
+	    //         let dist = Data::euclidean_distance(self.data.index_axis(Axis(0), i), self.data.index_axis(Axis(0), j));
+	    //         self.store[[i,j]] = dist;
+	    //         self.store[[j,i]] = dist;
+	    //     }
+	    // }
+	    // println!("Finished");
 	}
 
 	pub fn dist( &mut self, ids:&Vec<usize> ) -> f64{
@@ -193,25 +285,45 @@ impl Data {
 		println!("{}", self.data);
 	}
 
+	pub fn to_csv( data: &ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>>, file:String, sep:u8 ) -> Result<(), Box<dyn Error>> {
+
+	    // create a file for writing
+	    let file = File::create( file )?;
+
+	    // create a CSV writer
+	    let mut writer = WriterBuilder::new()
+	        .delimiter(sep)
+	        .quote_style(csv::QuoteStyle::Never)
+	        .flexible(true)
+	        .from_writer(file);
+
+	    // write each row of the array as a CSV record
+	    for row in data.rows() {
+	        writer.write_record(row.iter().map(|x| x.to_string()))?;
+	    }
+
+	    writer.flush()?;
+	    Ok(())
+	}
+
 }
 
 #[cfg(test)]
 mod tests {
 
     use crate::data::Data;
-    use std::path::Path;
+    use ndarray::Axis;
 
      #[test]
-    fn check_dist() {
+    fn check_kmeans() {
 
-    	let mut data = Data::read_file( &"testData/Spellman_Yeast_Cell_Cycle.tsv".to_string(), '\t' );
+    	let mut data = Data::read_file( &"testData/CellexalVR_TestData_tsne.csv".to_string(), ',' );
     	data.scale();
-    	let mut ids =Vec::<usize>::with_capacity(10);
-    	for i in 0..10{
-    		println!("{}", data.rownames[i]);
-    		ids.push(i);
-    	}
-    	assert_eq!( data.dist( &ids ), 58.69013053176867 );
+    	let kmeans = data.kmeans( 15, 15000 );
+    	assert_eq!( kmeans.len(), data.data.len_of(Axis(0)) );
+
+    	let exp:Vec<usize> = vec![0; data.data.len_of(Axis(0)) ];
+    	assert_eq!( kmeans, exp );
     }
 
 }

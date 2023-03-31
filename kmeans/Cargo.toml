@@ -8,3 +8,5 @@ edition = "2021"
 [dependencies]
 clap = { version = "3.0.14", features = ["derive"] }
 ndarray = "*"
+rand = "*"
+csv = "*"

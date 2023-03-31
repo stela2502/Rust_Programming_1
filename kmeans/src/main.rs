@@ -1,11 +1,9 @@
 use clap::Parser;
 
-use std::path::PathBuf;
-use std::fs;
 use std::time::SystemTime;
 
-use read_data::data::Data;
-
+use kmeans::data::Data;
+use std::io::Write;
 
 /// Run a simulated anealing clustering over the rows of the provided data. 
 /// The software is a demo project for the Lund Stem Cell Center - Bioinformatics Rust course.
@@ -19,6 +17,15 @@ struct Opts {
     /// the column separator for the file
     #[clap(default_value= "\\t",short, long)]
     sep: String,
+    /// the number of clusters
+    #[clap(short, long)]
+    clusters: usize,
+    /// the max iterations
+    #[clap(default_value_t= 1000*1000,short, long)]
+    max_it: usize,
+    /// the grouping outfile
+    #[clap(default_value= "testData/Clustering.txt",short, long)]
+    outfile: String,
 }
 
 fn main() {
@@ -27,13 +34,30 @@ fn main() {
     let opts: Opts = Opts::parse();
     let mut sep = '\t';
     if &opts.sep != "\\t"{
-        println!("I set sep to {}", opts.sep );
+        //println!("I set sep to {}", opts.sep );
         sep = opts.sep.chars().next().unwrap(); 
     }
 
     let data = Data::read_file( &opts.data , sep );
+    //eprintln!("Data read");
+    let cluster = data.kmeans( opts.clusters, opts.max_it );
+    //eprintln!("And we came here");
 
-    data.print();
+    let file = match std::fs::File::create( &opts.outfile ){
+        Ok(f) => f,
+        Err(e) => panic!("Sorry I could not not create the file {}: {e:?}", &opts.outfile),
+    };
+    let mut writer = std::io::BufWriter::new(file);
+
+    for i in 0..cluster.len(){
+        match writeln!(writer, "{},{}", data.rownames[i], cluster[i]){
+            Ok(_) => (),
+            Err(err) => {
+                panic!("write error: {err}");
+            }
+        }
+    }
+    //data.print();
 
     match now.elapsed() {
         Ok(elapsed) => {
@@ -48,7 +72,7 @@ fn main() {
             let min = milli % 60;
             milli= (milli -min) /60;
 
-            println!("finished in {milli} h {min} min {sec} sec {mil} milli sec");
+            eprintln!("finished in {milli} h {min} min {sec} sec {mil} milli sec");
         },
         Err(e) => {println!("Error: {e:?}");}
     }
