@@ -1,4 +1,4 @@
-# How do you get data into Rust
+# How do you get data into Rust?
 
 Getting data into a compiled langue has always been a problem for me.
 Hence I'll tell you how I finally managed to get data into Rust - just copy paste the solution - I do the same.

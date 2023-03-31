@@ -47,7 +47,7 @@ Why? Because the Rust compiler is a work of art. We will come to that - soon!
 
 Rust is OS independent - meaning you all will install it on your computer. Please follow these steps to install it on your system: [https://www.rust-lang.org/tools/install ](https://www.rust-lang.org/tools/install).
 
-This document contains code sniplets that will help you getting started, but you will do the coding in a programming IDE. I am working with [Sublime Text](https://www.sublimetext.com/), but you are welcome to use whichever us to your liking. We will use the terminal to compile and run our programs. I recommend you to use git to store your code. Please create a github or gitlab account. 
+This document contains code sniplets that will help you getting started, but you will do the coding in a programming IDE. I am working with [Sublime Text](https://www.sublimetext.com/), but you are welcome to use whichever is to your liking. We will use the terminal to compile and run our programs. I recommend you to use git to store your code. Please create a github or gitlab account if you not already have one.
 
 
 ```{r include=FALSE}

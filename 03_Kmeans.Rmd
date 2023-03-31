@@ -72,11 +72,11 @@ Hope that helps! Let me know if you have any questions.
 
 Sure - why not. Let's recapitulate what the kmers algorithm should do and check if we find the respective lines in the code.
 
-The data should already be in memory and the data should be a ndarray. Here it is obviously called "data". But I would not like to have an Array2<f64> back.
-This data should rather be a Vec<usize>. Keep that in mind for later.
+The data should already be in memory and it should be a ndarray. Here it is obviously called "data". But I would not like to have an Array2<f64> back.
+This function should rather return a Vec<usize>. Keep that in mind for later.
 
-Next in the kmeans algorithm is to select a random set of initial 'centers'. This step is totally missing here.
-We need a random number generator here:
+Next in the kmeans algorithm is to select a random set of initial 'centromers'. This step is totally missing here.
+To select a random set of starting rows we need a random number generator. In Rust this works like that:
 
 ```
 use rand::Rng;
@@ -84,12 +84,14 @@ let mut rng = rand::thread_rng();
 rng.gen_range(0..100); // gives a random number in this range.
 ```
 
-Next we loop until convergence is reached. That is not good. We do not want the program to end in an endless loop. Add another variable called max_it:usize adn use this in a for loop.
+Next we loop until convergence is reached. That is not good. 
+BUT we do not want the program to end in an endless loop. 
+Add another variable called max_it:usize and use this in a 'for' loop.
 
 
 # Let's walk through:
 
-## Change the data type, the return value and add a way to select the initial set of centroids.
+## Change the data type (to the type we have in our read_data), the return value and add a way to select the initial random set of centroids.
 
 
 ```
@@ -118,6 +120,7 @@ fn kmeans(data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, k: usize) 
 ## Should we have more functions?
 
 Now we would select the labels - a vector stating the closest 'centroid' for each row of the data.
+But we will need this functionality also in the loop. Hence I would implement a function to do that.
 This function should compare the centroids to every row of the data.
 
 
@@ -136,7 +139,7 @@ fn asign_labels(data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, cent
             let distance = (data.slice(s![i, ..]) - centroids.slice(s![j, ..])).norm();
             if distance < min_distance {
                 min_distance = distance;
-                labels[[i, 0]] = j;
+                labels[i] = j;
             }
         }
     }
@@ -166,8 +169,10 @@ fn kmeans(data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, k: usize) 
 ## Add a function to calculate the centroids
 
 The next time we get the centroids will be more complicated.
-I like functions as one could also create specific tests for each function.
+I like functions as one can also create specific tests for each function.
+AND THAT IS SOMETHING WE SHOULD REALLY DO!
 
+But first the calculate_centroids function:
 
 ```
 use ndarray::ArrayBase;
@@ -215,10 +220,11 @@ fn kmeans(data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, k: usize, 
         centroids.row_mut(i).assign(&self.data.row(sample_idx));
     }
     let mut labels = asign_labels( data, centroids );
+    let mut new_labels:Vec<usize>;
 
     for it in 0..max_it{
         calculate_centroids( data, labels, k, centroids );
-        let new_labels = asign_labels( data, centroids );
+        new_labels = asign_labels( data, centroids );
         if new_labels == labels{
             print("converged after {it} itherations");
             break;
@@ -239,7 +245,7 @@ As we now have so many nice functions that could be tested - lets add some tests
 
 Oh - now we actually neeed some data in this. :-(
 
-Let's combine the kmeans with the Data object we had as an example before.
+Let's combine the kmeans functionality with the Data object we had as an example before.
 
 Copy the read_data folder and name it kmeans.
 Now you need to change the Cargo.toml: read_data -> kmeans.
@@ -249,7 +255,7 @@ You could compile it and check if it is working.
 Add the kmeans functionality to the Data class or to the main.rs script.
 This will take some time - I will help you, but there will be no help in this document.
 
-We go on weith the testing here:
+We go on with the testing here:
 
 
 ```
@@ -259,6 +265,7 @@ mod tests {
 
     use crate::data::Data;
     use ndarray::Axis;
+    use ndarray::ArrayBase;
 
     #[test]
     fn check_kmeans() {
@@ -274,7 +281,10 @@ mod tests {
 
     #[test]
     fn check_calculate_centroids() {
-
+        let mut data = Data::read_file( &"testData/CellexalVR_TestData_tsne.csv".to_string(), ',' );
+        data.scale();
+        
+        Data::calculate_centroids();
     }
 
     #[test]

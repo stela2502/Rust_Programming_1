@@ -11,7 +11,7 @@
 
 <meta name="author" content="Stefan Lang" />
 
-<meta name="date" content="2023-03-29" />
+<meta name="date" content="2023-03-31" />
 
 <title>An introduction to Rust programming</title>
 
@@ -440,7 +440,7 @@ display: none;
 
 <h1 class="title toc-ignore">An introduction to Rust programming</h1>
 <h4 class="author">Stefan Lang</h4>
-<h4 class="date">2023-03-29</h4>
+<h4 class="date">2023-03-31</h4>
 
 </div>
 
@@ -478,30 +478,32 @@ computer. Please follow these steps to install it on your system: <a href="https
 <p>This document contains code sniplets that will help you getting
 started, but you will do the coding in a programming IDE. I am working
 with <a href="https://www.sublimetext.com/">Sublime Text</a>, but you
-are welcome to use whichever us to your liking. We will use the terminal
+are welcome to use whichever is to your liking. We will use the terminal
 to compile and run our programs. I recommend you to use git to store
-your code. Please create a github or gitlab account.</p>
+your code. Please create a github or gitlab account if you not already
+have one.</p>
 <!--chapter:end:index.Rmd-->
 </div>
 </div>
 <div id="variables" class="section level1">
 <h1>Variables</h1>
 <p>Rust uses strong typed variables. This does mean that you need to
-define your variables as a specific type. So if you want to store and
-integer value you can choose between the types u8, u16, u32, u64, u128,
-i8, i16, i32, i64, i128, usize and integer. All of these types can not
-be compared against each other. So if you want to create some data
-structures it does help to choose the same type for the data. The
-difference between the integer types are the range of values they can
-contain: u8 and i8 are 8 bit long whereas u128 and i128 are 128 bit
-long. Usize is the default integer type and is dependent on your
-computer type. On 64 bit computers it is the same as a u64 - but you
-still can not compare it directly to u64.</p>
+define your variables as a specific type. As an example you can store
+integer values as u8, u16, u32, u64, u128, i8, i16, i32, i64, i128,
+usize or integer. All of these types can not be compared against each
+other. So if you want to create some data structures it does help to
+choose the same type for all data (eg. integers). The difference between
+the integer types are the range of values they can contain: u8 and i8
+are 8 bit long whereas u128 and i128 are 128 bit long; the u types are
+unsigned and can not contain negative values. Usize is the default
+integer type and is dependent on your computer type. On 64 bit computers
+it is the same as a u64 - but you still can not compare it directly to
+u64.</p>
 </div>
 <div id="examples" class="section level1">
 <h1>Examples</h1>
 <p>For now we will use the extendr package to make this run in Rmd:</p>
-<p><code>{ r eval=FALSE} remotes::install_github(&quot;extendr/rextendr&quot;)</code></p>
+<pre class="r"><code>remotes::install_github(&quot;extendr/rextendr&quot;)</code></pre>
 <p>And now we can actually look into what the variables contain:</p>
 <pre class="rust"><code>let x = 5;
 let y = 7;
@@ -509,18 +511,28 @@ let z = x*y;
 
 rprintln!(&quot;{x} * {y} = {z}&quot;);</code></pre>
 <pre><code>## 5 * 7 = 35</code></pre>
-<p>And now lets break that:</p>
+<p>So what about strings?</p>
+<pre class="rust"><code>let seq = &quot;AGCT&quot;;
+let bseq = b&quot;AGCT&quot;;
+
+rprintln!(&quot;{seq}&quot;);
+rprintln!(&quot;{bseq:?}&quot;);</code></pre>
+<pre><code>## AGCT
+## [65, 71, 67, 84]</code></pre>
+</div>
+<div id="create-a-new-rust-program" class="section level1">
+<h1>Create a new Rust program</h1>
+<p>I do not use Rust from within R, hence I can not teach that. It also
+makes more sense to me to compile Rust programs and use them on the
+command line.</p>
+<p>As an example of why I deliberately broke the integer example:</p>
 <pre><code>let x:u8 = 5;
 let y:u16 = 7;
 let z = x*y;
 
 println!(&quot;{x} * {y} = {z}&quot;);</code></pre>
-<p>I unfortunately can not show the error message here as the bookdown
-process dies if the compile did not work. So now you would need to try
-to get the compiler error yourself:</p>
-<ol style="list-style-type: decimal">
-<li>Create a new Rust program</li>
-</ol>
+<p>I can not generate this html file here using this code, but if I
+create a stand alone ‘program’ of it it works:</p>
 <pre class="bash"><code>cargo new workshop --bin</code></pre>
 <p>Open the created file “workshop/srv/main.rs” and replace the
 “println!(”Hello, world!“);” with the wrong code we had before.</p>
@@ -559,15 +571,19 @@ cargo build -r</code></pre>
 <div id="a-small-rust-program-with-a-function" class="section level1">
 <h1>A small Rust program with a function</h1>
 <p>Now we need to dig deeper and I recommend you to use your programming
-IDE of choice to look into an broken program. Rstudio would also do.</p>
-<p>So lets look in the simple_problem folder in <a href="https://github.com/stela2502/Rust_Programming_1">this github
+IDE of choice to look into a different broken program. Rstudio would
+also do.</p>
+<p>Lets look in the simple_problem folder in <a href="https://github.com/stela2502/Rust_Programming_1">this github
 repo</a>.</p>
-<p>Download (clone) the repo using git. Open the folder ‘simple_problem’
-in your IDE and open a terminal and cd into this folder.</p>
+<p>Download (clone) the repo using git
+<code>git clone https://github.com/stela2502/Rust_Programming_1</code>.
+Open the folder ‘simple_problem’ in your IDE and open a terminal and cd
+into this folder.</p>
 <p>There you run:</p>
 <pre class="bash"><code>cargo build -r</code></pre>
 <p>It is almost no fun hiding programming erros as the compiler will
-already tell you what to do - right? I think this will be fun…</p>
+already tell you what to do - right? I think this nevertheless will be
+fun…</p>
 <div id="problem-1" class="section level2">
 <h2>Problem 1</h2>
 <p>Each line needs to end with a ‘;’. All but the last line in a
@@ -595,9 +611,423 @@ How do you fix that?</p>
 find out - right?</p>
 </div>
 </div>
+<div id="tests-in-rust" class="section level1">
+<h1>Tests in Rust</h1>
+<p>Rust has a nice way to test scripts and libraryies: Add this to the
+script</p>
+<pre><code>#[cfg(test)]
+mod tests {
+    use crate::sum;
+    #[test]
+    fn check_sum() {
+      
+      let data:Vec&lt;usize&gt; = vec![1,2,3,4,5,6,7,8,9];
+      let ids:Vec&lt;usize&gt; = vec![5,6,7,8];
+      
+        assert_eq!( sum( &amp;data, &amp;ids ), 30 );
+    }
+}</code></pre>
+<p>And now you can test your script by</p>
+<pre><code>cargo test -r</code></pre>
+</div>
 <div id="a-short-break" class="section level1">
 <h1>A short break</h1>
 <!--chapter:end:01_Variables.Rmd-->
+</div>
+<div id="how-do-you-get-data-into-rust" class="section level1">
+<h1>How do you get data into Rust</h1>
+<p>Getting data into a compiled langue has always been a problem for me.
+Hence I’ll tell you how I finally managed to get data into Rust - just
+copy paste the solution - I do the same.</p>
+<p>Lets look into the folder ‘read_data’. This Rust package actually not
+only contains a main.rs, but also a lib.rs and data.rs. The lib.rs is
+the file where all library files in your package are defined. And all
+other files can be included there. Just follow the example.</p>
+<p>I actually have copied the library file from my simulated_anealing
+Rust project. You will also implement something like that in Rust at the
+end and I hope this little primer brings you up to speed now.</p>
+<p>Let’s dig through the library.</p>
+<p>Start with the main.rs file. This is what will be compiled to be the
+executable. The program starts with the main function.</p>
+<p>The top 7 lines load libraries with line 7 loading the included Data
+class.</p>
+<p>The following structure is a way to get command line options into the
+program. This struct ‘Opts’ defines the command line options available
+for this program. We have here a data which is a String and contains a
+default value (out test dataset) and a ‘sep’ that is a default ’ here as
+the Spellman_Yeast_Cell_Cycle.csv table is actually tab separated.</p>
+<p>The main function first starts a timer (I think it is useful most of
+the times) and reads the command line option in. The ’ has been a little
+buit a problem for me and here you see my solution to that.</p>
+<p>All the Main really does here is to load the data with the line
+<code>let data = Data::read_file( &amp;opts.data, sep)</code>. And print
+the contents with the next line. Afterwards there is a lot of time
+calculation and a statement how long the process did take.</p>
+<p>So all the fun has to be coded somewhere else.</p>
+<p>Let’s look into the lib.rs file.</p>
+<pre><code>pub mod data;</code></pre>
+<p>Oh that is boring. It only imports the thingsfrom data.rs…</p>
+</div>
+<div id="the-data-class" class="section level1">
+<h1>The Data class</h1>
+<p>A class in Rust is defined by creating the data structure for the
+class (struct Data {}) and then implementing functions for the class
+(impl Data {}). Functions can be defined with</p>
+<pre><code>fn &lt;function name&gt; (&lt;variables&gt;) -&gt; &lt;return value&gt; { 
+    &lt;code&gt; 
+} </code></pre>
+<p>Lets look into the new function:</p>
+<pre><code>pub fn new( rows:usize, cols:usize, data: Vec::&lt;f64&gt;, rownames: Vec::&lt;String&gt; ) -&gt; Self {
+
+    let ret = Array::from_iter(&amp;mut data.iter().cloned());
+    let data = ret.into_shape([rows, cols]).unwrap();
+    let store = Array::default((rows, rows));
+    let total_energy =  vec![0.0; rows];
+
+    Self {
+        rows, 
+        cols,
+        rownames,
+        data,
+        total_energy,
+        store,
+    }
+}</code></pre>
+<p>Here we define the class contents and return a Self object.</p>
+<p>The read_file funciton is more interesting as it contains an example
+of how Rust handles errors:</p>
+<pre><code>match line {
+    Ok(line) =&gt; {
+        .
+        .
+        .
+    },
+    Err(err) =&gt; {
+        panic!(&quot;Unexpected error reading the csv file: {err:?}&quot;);
+    }
+}</code></pre>
+<p>The ‘line’ object is one line in the data file and the function I
+used to get this data returns a ‘Result’ - meaning it is normal that
+thif function might not work. And this is the common way to treat a
+Result. You can also stack these as you can see in the previousely
+hidden code of the function:</p>
+<pre><code>header =true;
+for mut val in line.split( sep ).collect::&lt;Vec&lt;&amp;str&gt;&gt;(){
+    if header{
+        names.push( val.to_string() );
+        header = false;
+    }else {
+        val = val.trim();
+        let v = match val.parse::&lt;f64&gt;() {
+            Ok( v ) =&gt; v,
+            Err(_err) =&gt; {
+                match val.parse::&lt;usize&gt;(){
+                    Ok(v) =&gt;  { 
+                        v as f64
+                    },
+                    Err(err) =&gt; {
+                        eprintln!(&quot;I could not parse &#39;{val}&#39; to usize or f64 {err:?}&quot;);
+                        0.0
+                    },
+                }
+            },
+        };
+        arr.push( v );
+    }
+}</code></pre>
+<p>What does this ‘mut’ mean? Rust differentiates between variables you
+only store a value in once and variables that you can modify. So
+whenever you want to asigne a value to a variable more than once you
+need to declare the variable as mut. It also does not allow access to a
+variable in more than one function.</p>
+<pre><code>for mut val in line.split( sep ).collect::&lt;Vec&lt;&amp;str&gt;&gt;()</code></pre>
+<p>Translates to: split the line by ‘sep’ and give me ownership of the
+variables you create as Vec&lt;&amp;str&gt; and iterate over the
+variables in the vector that I want to be able to modify.</p>
+<p>Where do we modify the value? <code>val = val.trim();</code> does
+remove whitespace from the strings. This is necessary as ” 2” can not be
+parsed as 2:<usize>. Tried that and it broke ;-) Rust also does not want
+to parse an int as float and vice versa. So therfore I need to
+differentiate between the two options here.</p>
+<p>I assume you can see what is going on here? What does this function
+do?</p>
+</div>
+<div id="excercise" class="section level1">
+<h1>Excercise</h1>
+<p>Try to use this example and implement a kmeans algorithm based on the
+Data class from the last example. The kmeans function should be defined
+in the Data class and the input to this function should be the Data
+class itself. You can then change the ‘data’ variable to &amp;self in
+the function and to self.data in the function body.</p>
+<p>I assume it is bad habbit to just add the two other functions there,
+too, but just do it for now. We are not hard core programmers after all
+:-D</p>
+<p>Make the kmeans function public and call it in the main.rs script.
+You need to add tow additional values to the options.</p>
+<!--chapter:end:02_LoadData.Rmd-->
+</div>
+<div id="use-the-data-class-to-implement-a-kmeans-algorithm" class="section level1">
+<h1>Use the Data class to implement a kmeans algorithm</h1>
+<p>Honestly - nowadays I never start anything without asking ChatGPT
+first. So why not use it here, too.</p>
+<p>This is my conversation with ChatGPT:</p>
+<pre><code>Hi Chatgpt. Can you tell me how to code kmeans in Rust if the data is stored in 2d ndarrays  and the rows should be clustered.
+
+Sure, I can help you with that! Here&#39;s an implementation of the KMeans algorithm in Rust using the ndarray crate to handle the 2D data:
+
+rust
+
+use ndarray::{Array2, Axis};
+
+fn kmeans(data: &amp;Array2&lt;f64&gt;, k: usize) -&gt; Array2&lt;f64&gt; {
+    let n = data.nrows();
+    let d = data.ncols();
+    let mut centroids = data.slice(s![..k, ..]).to_owned();
+    let mut labels = Array2::zeros((n, 1));
+
+    loop {
+        let mut new_labels = Array2::zeros((n, 1));
+        for i in 0..n {
+            let mut min_distance = f64::INFINITY;
+            for j in 0..k {
+                let distance = (data.slice(s![i, ..]) - centroids.slice(s![j, ..])).norm();
+                if distance &lt; min_distance {
+                    min_distance = distance;
+                    new_labels[[i, 0]] = j as f64;
+                }
+            }
+        }
+        if new_labels == labels {
+            break;
+        }
+        labels.assign(&amp;new_labels);
+        for j in 0..k {
+            let mask = labels.iter().enumerate().filter(|(_, &amp;l)| l == j as f64)
+                .map(|(i, _)| i).collect::&lt;Vec&lt;_&gt;&gt;();
+            let cluster_data = data.select(Axis(0), &amp;mask);
+            if !cluster_data.is_empty() {
+                centroids.slice_mut(s![j, ..]).assign(&amp;cluster_data.mean_axis(Axis(0)).unwrap());
+            }
+        }
+    }
+    labels
+}
+
+This implementation takes as input an Array2&lt;f64&gt; representing the data, and an integer k representing the number of clusters to find. It returns an Array2&lt;f64&gt; of the same shape as the input data, containing the cluster labels for each row.
+
+The algorithm works as follows:
+
+    Initialize centroids to k randomly chosen rows from the input data.
+    Loop until convergence:
+    a. Assign each row to the cluster with the closest centroid.
+    b. Update the centroid of each cluster to be the mean of its assigned rows.
+    c. If the cluster assignments haven&#39;t changed, exit the loop.
+    Return the cluster labels for each row.
+
+The implementation should be fairly self-explanatory, but I&#39;ll provide some additional details:
+
+    We use the norm() method to compute the Euclidean distance between a row of data and a centroid.
+    The slice() method is used to extract subsets of the data and centroids arrays.
+    The select() method is used to extract the rows of data belonging to a given cluster.
+    The mean_axis() method is used to compute the mean of the rows belonging to a given cluster.
+
+Hope that helps! Let me know if you have any questions.</code></pre>
+<p>Sure - why not. Let’s recapitulate what the kmers algorithm should do
+and check if we find the respective lines in the code.</p>
+<p>The data should already be in memory and the data should be a
+ndarray. Here it is obviously called “data”. But I would not like to
+have an Array2<f64> back. This data should rather be a Vec<usize>. Keep
+that in mind for later.</p>
+<p>Next in the kmeans algorithm is to select a random set of initial
+‘centers’. This step is totally missing here. We need a random number
+generator here:</p>
+<pre><code>use rand::Rng;
+let mut rng = rand::thread_rng();
+rng.gen_range(0..100); // gives a random number in this range.</code></pre>
+<p>Next we loop until convergence is reached. That is not good. We do
+not want the program to end in an endless loop. Add another variable
+called max_it:usize adn use this in a for loop.</p>
+</div>
+<div id="lets-walk-through" class="section level1">
+<h1>Let’s walk through:</h1>
+<div id="change-the-data-type-the-return-value-and-add-a-way-to-select-the-initial-set-of-centroids." class="section level2">
+<h2>Change the data type, the return value and add a way to select the
+initial set of centroids.</h2>
+<pre><code>use ndarray::ArrayBase;
+use rand::Rng;
+
+
+fn kmeans(data: &amp;ArrayBase&lt;ndarray::OwnedRepr&lt;f64&gt;, Dim&lt;[usize; 2]&gt;&gt;, k: usize) -&gt; Vec&lt;usize&gt; {
+    let n = data.nrows();
+    let d = data.ncols();
+    let mut rng = rand::thread_rng();
+
+    let mut centroids = Array::zeros((k, data.len_of(Axis(1))));
+    for i in  0..k{
+        let sample_idx = rng.gen_range(0..n);
+        centroids.row_mut(i).assign(&amp;self.data.row(sample_idx));
+    }
+    let mut labels = Vec&lt;usize&gt;::with_capacity(n);
+
+    .
+    .
+    .
+}</code></pre>
+</div>
+<div id="should-we-have-more-functions" class="section level2">
+<h2>Should we have more functions?</h2>
+<p>Now we would select the labels - a vector stating the closest
+‘centroid’ for each row of the data. This function should compare the
+centroids to every row of the data.</p>
+<pre><code>use ndarray::ArrayBase;
+use rand::Rng;
+
+
+fn asign_labels(data: &amp;ArrayBase&lt;ndarray::OwnedRepr&lt;f64&gt;, Dim&lt;[usize; 2]&gt;&gt;, centroids: &amp;ArrayBase&lt;ndarray::OwnedRepr&lt;f64&gt;, Dim&lt;[usize; 2]&gt;&gt; ) -&gt; Vec&lt;usize&gt; {
+    let n = data.nrows();
+    let mut labels = Vec&lt;usize&gt;::with_capacity( n );
+    
+    for id in 0..n{
+        let mut min_distance = f64::INFINITY;
+        for j in 0..k {
+            let distance = (data.slice(s![i, ..]) - centroids.slice(s![j, ..])).norm();
+            if distance &lt; min_distance {
+                min_distance = distance;
+                labels[[i, 0]] = j;
+            }
+        }
+    }
+    labels
+}
+
+fn kmeans(data: &amp;ArrayBase&lt;ndarray::OwnedRepr&lt;f64&gt;, Dim&lt;[usize; 2]&gt;&gt;, k: usize) -&gt; Vec&lt;usize&gt; {
+    let n = data.nrows();
+    let d = data.ncols();
+    let mut rng = rand::thread_rng();
+
+    let mut centroids = Array::zeros((k, data.len_of(Axis(1))));
+    for i in  0..k{
+        let sample_idx = rng.gen_range(0..n);
+        centroids.row_mut(i).assign(&amp;self.data.row(sample_idx));
+    }
+    let mut labels = asign_labels( data, centroids );
+
+    .
+    .
+    .
+}
+</code></pre>
+</div>
+<div id="add-a-function-to-calculate-the-centroids" class="section level2">
+<h2>Add a function to calculate the centroids</h2>
+<p>The next time we get the centroids will be more complicated. I like
+functions as one could also create specific tests for each function.</p>
+<pre><code>use ndarray::ArrayBase;
+use rand::Rng;
+
+
+fn asign_labels(data: &amp;ArrayBase&lt;ndarray::OwnedRepr&lt;f64&gt;, Dim&lt;[usize; 2]&gt;&gt;, centroids: &amp;ArrayBase&lt;ndarray::OwnedRepr&lt;f64&gt;, Dim&lt;[usize; 2]&gt;&gt; ) -&gt; Vec&lt;usize&gt; {
+    let n = data.nrows();
+    let mut labels = Vec&lt;usize&gt;::with_capacity( n );
+    
+    for id in 0..n{
+        let mut min_distance = f64::INFINITY;
+        for j in 0..k {
+            let distance = (data.slice(s![i, ..]) - centroids.slice(s![j, ..])).norm();
+            if distance &lt; min_distance {
+                min_distance = distance;
+                labels[[i, 0]] = j;
+            }
+        }
+    }
+    labels
+}
+
+fn calculate_centroids( data: &amp;ArrayBase&lt;ndarray::OwnedRepr&lt;f64&gt;, Dim&lt;[usize; 2]&gt;&gt;, labels:Vec&lt;usize&gt;, 
+            k:usize, &amp;mut centroids: &amp;ArrayBase&lt;ndarray::OwnedRepr&lt;f64&gt;, Dim&lt;[usize; 2]&gt;&gt; ) {
+
+    for j in 0..k {
+        let mask = labels.iter().enumerate().filter(|(_, &amp;l)| l == j )
+            .map(|(i, _)| i).collect::&lt;Vec&lt;_&gt;&gt;();
+        let cluster_data = data.select(Axis(0), &amp;mask);
+        if !cluster_data.is_empty() {
+            centroids.slice_mut(s![j, ..]).assign(&amp;cluster_data.mean_axis(Axis(0)).unwrap());
+        }
+    } 
+}
+
+fn kmeans(data: &amp;ArrayBase&lt;ndarray::OwnedRepr&lt;f64&gt;, Dim&lt;[usize; 2]&gt;&gt;, k: usize, max_it:usize) -&gt; Vec&lt;usize&gt; {
+    let n = data.nrows();
+    let d = data.ncols();
+    let mut rng = rand::thread_rng();
+
+    let mut centroids = Array::zeros((k, data.len_of(Axis(1))));
+    for i in  0..k{
+        let sample_idx = rng.gen_range(0..n);
+        centroids.row_mut(i).assign(&amp;self.data.row(sample_idx));
+    }
+    let mut labels = asign_labels( data, centroids );
+
+    for it in 0..max_it{
+        calculate_centroids( data, labels, k, centroids );
+        let new_labels = asign_labels( data, centroids );
+        if new_labels == labels{
+            print(&quot;converged after {it} itherations&quot;);
+            break;
+        }
+        labels = new_labels;
+    }
+    labels
+}
+</code></pre>
+</div>
+</div>
+<div id="and-the-testing" class="section level1">
+<h1>And the TESTING!</h1>
+<p>As we now have so many nice functions that could be tested - lets add
+some tests:</p>
+<p>Oh - now we actually neeed some data in this. :-(</p>
+<p>Let’s combine the kmeans with the Data object we had as an example
+before.</p>
+<p>Copy the read_data folder and name it kmeans. Now you need to change
+the Cargo.toml: read_data -&gt; kmeans.</p>
+<p>You could compile it and check if it is working.</p>
+<p>Add the kmeans functionality to the Data class or to the main.rs
+script. This will take some time - I will help you, but there will be no
+help in this document.</p>
+<p>We go on weith the testing here:</p>
+<pre><code>
+#[cfg(test)]
+mod tests {
+
+    use crate::data::Data;
+    use ndarray::Axis;
+
+    #[test]
+    fn check_kmeans() {
+
+        let mut data = Data::read_file( &amp;&quot;testData/CellexalVR_TestData_tsne.csv&quot;.to_string(), &#39;,&#39; );
+        data.scale();
+        let kmeans = data.kmeans( 15, 15000 );
+        assert_eq!( kmeans.len(), data.data.len_of(Axis(0)) );
+
+        let exp:Vec&lt;usize&gt; = vec![0; data.data.len_of(Axis(0)) ];
+        assert!( kmeans != exp, &quot;the kmeans values are not zero&quot; );
+    }
+
+    #[test]
+    fn check_calculate_centroids() {
+
+    }
+
+    #[test]
+    fn check_asign_labels() {
+
+    }
+
+}
+</code></pre>
+<!--chapter:end:03_Kmeans.Rmd-->
 </div>
 
 
