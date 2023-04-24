@@ -67,6 +67,7 @@ match <statement> {
 I am sure you will like this ;-)
 
 
+The next part reads the command line options into the program:
 
 ```
 let opts: Opts = Opts::parse();
@@ -78,25 +79,18 @@ if &opts.sep != "\\t"{
 ```
 
 This first parses the command line. The rest is my way to handle the problem that you can not give Rust a '\t' as char as that can only contain one literal.
-So I have used the tab as default instead of dealing weith this problem in an other way.
+So I have used the tab as default instead of dealing with this problem in any other way.
 
-So the final 'work' the tool does is in the left over one lines:
+
+
+This leaves us with the final 'work' the tool does is in these lines:
 
 ```
 let data = Data::read_file( &opts.data , sep );
 data.print();
 ```
 
-This first defines a data variable using the Data::read_file function and then uses the Data::print function to print the contens of the data object.
-
-### And the libraray data.rs
-
-This file defines the Data class.
-
-- lines 0..9 define the dependancies
-- lines 11..19 define the data part of the class
-- lines 22..196 code the functions
-- lines 198..217 implement the tests for this class
+This first defines a data variable using the Data::read_file() function and then uses the Data::print() function to print the contens of the data object.
 
 
 ### The lib.rs file
@@ -107,9 +101,14 @@ pub mod data;
 
 Oh that is boring. It only imports the thingsfrom data.rs...
 
-# The data.rs file
+### The data.rs file
 
 This file now defines the Data class.
+
+- lines 0..9 define the dependencies
+- lines 11..19 define the data part of the class
+- lines 22..196 code the functions
+- lines 198..217 implement the tests for this class
 
 A class in Rust is defined by creating the data structure for the class (struct Data {}) and then implementing functions for the class (impl Data {}).
 Functions can be defined with 
@@ -141,8 +140,7 @@ pub fn new( rows:usize, cols:usize, data: Vec::<f64>, rownames: Vec::<String> ) 
 }
 ```
 
-Here we define the class contents and return a Self object.
-
+Here we define the class contents and return a Self object - special focus on the missing ';' in the end...
 
 ### The read_file function
 

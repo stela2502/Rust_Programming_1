@@ -7,3 +7,8 @@ In order to apply you are expected to know what object oriented programming is, 
 The course can be found here: https://stela2502.github.io/Rust_Programming_1/
 
 It is very tailored to bioinformaticians.
+
+
+# how to 'build' this:
+
+The easiest way is to install RStudio, clone this repo and open the RData here.
