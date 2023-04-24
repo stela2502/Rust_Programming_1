@@ -3,35 +3,103 @@
 Getting data into a compiled langue has always been a problem for me.
 Hence I'll tell you how I finally managed to get data into Rust - just copy paste the solution - I do the same.
 
-Lets look into the folder 'read_data'. 
-This Rust package actually not only contains a main.rs, but also a lib.rs and data.rs. 
-The lib.rs is the file where all library files in your package are defined. 
-And all other files can be included there. Just follow the example.
+The git repo contains a folder 'read_data' that is a simple Rust package.
+Looking into it you see a Cargo.toml. This file describes your package and is comparable to the R DESCRIPTION file.
+Here you define the package and the dependancies. Just look into the example. It should be self explanatory.
 
-I actually have copied the library file from my simulated_anealing Rust project. 
-You will also implement something like that in Rust at the end and I hope this little primer brings you up to speed now.
+The src folder contains the code files with main.rs defining the executable, and the lib.rs defining the library part of the package.
+The additional data.rs file contains the code for the library in this package and needs to be mentioned in the lib.rs file to be compiled.
+
 
 Let's dig through the library.
 
 
-Start with the main.rs file. This is what will be compiled to be the executable. The program starts with the main function.
+### Start with the main.rs file. 
 
-The top 7 lines load libraries with line 7 loading the included Data class.
+This file will be compiled to be the executable. The program starts with the main function.
 
-The following structure is a way to get command line options into the program. This struct 'Opts' defines the command line options available for this program.
-We have here a data which is a String and contains a default value (out test dataset) and a 'sep' that is a default '\t' here as the Spellman_Yeast_Cell_Cycle.csv table is actually tab separated.
+- lines 0..7   import the used classes
+- lines 13..22 define the command line options
+- lines 24..55 define the main function
+
+In the code most of this is a timer functionality that I do think is extremely useful.
+
+```
+let now = SystemTime::now();
+
+...
+
+match now.elapsed() {
+    Ok(elapsed) => {
+        let mut milli = elapsed.as_millis();
+        
+        let mil = milli % 1000;
+        milli= (milli - mil) /1000;
+
+        let sec = milli % 60;
+        milli= (milli -sec) /60;
+
+        let min = milli % 60;
+        milli= (milli -min) /60;
+
+        println!("finished in {milli} h {min} min {sec} sec {mil} milli sec");
+    },
+    Err(e) => {println!("Error: {e:?}");}
+}
+```
+
+Using 'let <var_name>: <type> = <value>' defines variables in Rust.
+The type does not need to be included in the definition if the compiler can identify the type itself.
+
+
+The 'match' part is the main Rust error handling functionality. 
+
+The next bigger part is the reading of the command line options: 'now.elapsed()' is a function that can fail and therefore returns a "Result<Duration, SystemTimeError>" instead of only a Duration.
+This allows for the match to check if an error has occured:
+
+```
+match <statement> {
+    Ok(<varname>) => { <do something with the variable> },
+    Err(e) => { <do something with the error> }#
+};
+```
+
+I am sure you will like this ;-)
 
 
 
-The main function first starts a timer (I think it is useful most of the times) and reads the command line option in.
-The '\t' has been a little buit a problem for me and here you see my solution to that.
+```
+let opts: Opts = Opts::parse();
+let mut sep = '\t';
+if &opts.sep != "\\t"{
+    println!("I set sep to {}", opts.sep );
+    sep = opts.sep.chars().next().unwrap(); 
+}
+```
 
-All the Main really does here is to load the data with the line ``let data = Data::read_file( &opts.data, sep)``.
-And print the contents with the next line. Afterwards there is a lot of time calculation and a statement how long the process did take.
+This first parses the command line. The rest is my way to handle the problem that you can not give Rust a '\t' as char as that can only contain one literal.
+So I have used the tab as default instead of dealing weith this problem in an other way.
 
-So all the fun has to be coded somewhere else.
+So the final 'work' the tool does is in the left over one lines:
 
-Let's look into the lib.rs file.
+```
+let data = Data::read_file( &opts.data , sep );
+data.print();
+```
+
+This first defines a data variable using the Data::read_file function and then uses the Data::print function to print the contens of the data object.
+
+### And the libraray data.rs
+
+This file defines the Data class.
+
+- lines 0..9 define the dependancies
+- lines 11..19 define the data part of the class
+- lines 22..196 code the functions
+- lines 198..217 implement the tests for this class
+
+
+### The lib.rs file
 
 ```
 pub mod data;
@@ -39,7 +107,9 @@ pub mod data;
 
 Oh that is boring. It only imports the thingsfrom data.rs...
 
-# The Data class
+# The data.rs file
+
+This file now defines the Data class.
 
 A class in Rust is defined by creating the data structure for the class (struct Data {}) and then implementing functions for the class (impl Data {}).
 Functions can be defined with 
@@ -73,23 +143,16 @@ pub fn new( rows:usize, cols:usize, data: Vec::<f64>, rownames: Vec::<String> ) 
 
 Here we define the class contents and return a Self object.
 
-The read_file funciton is more interesting as it contains an example of how Rust handles errors: 
 
-```
-match line {
-    Ok(line) => {
-    	.
-    	.
-    	.
-    },
-    Err(err) => {
-        panic!("Unexpected error reading the csv file: {err:?}");
-    }
-}
-```
+### The read_file function
 
-The 'line' object is one line in the data file and the function I used to get this data returns a 'Result' - meaning it is normal that thif function might not work.
-And this is the common way to treat a Result. You can also stack these as you can see in the previousely hidden code of the function:
+The read_file function shows a general problem of compiled languages.
+Normally you should know how much data you want to store in the objects as the memory needs to be requested per variable.
+Adding more 'space' to a variable is quite costy. Hence here we iterate over the data twice. Lines 47..62 read the data and 'only' collect the column and row counts.
+
+
+The 'line' object contains one line of the data file and the reader.lines() function returns a 'Result' - meaning it is normal that this function might not work.
+And - again - this is the common way to treat a Result:
 
 ```
 header =true;
@@ -129,18 +192,9 @@ for mut val in line.split( sep ).collect::<Vec<&str>>()
 Translates to: split the line by 'sep' and give me ownership of the variables you create as Vec<&str> and iterate over the variables in the vector that I want to be able to modify.
 
 Where do we modify the value? ``val = val.trim();`` does remove whitespace from the strings. This is necessary as " 2" can not be parsed as 2:<usize>. Tried that and it broke ;-)
-Rust also does not want to parse an int as float and vice versa. So therfore I need to differentiate between the two options here. 
+Rust also does not want to parse an int as float and vice versa. So therfore I need to differentiate between the two options here, too. 
 
 
 I assume you can see what is going on here? What does this function do?
 
 
-# Excercise  
-
-Try to use this example and implement a kmeans algorithm based on the Data class from the last example.
-The kmeans function should be defined in the Data class and the input to this function should be the Data class itself.
-You can then change the 'data' variable to &self in the function and to self.data in the function body.
-
-I assume it is bad habbit to just add the two other functions there, too, but just do it for now. We are not hard core programmers after all :-D
-
-Make the kmeans function public and call it in the main.rs script. You need to add tow additional values to the options. 

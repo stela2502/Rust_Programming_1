@@ -70,12 +70,14 @@ The implementation should be fairly self-explanatory, but I'll provide some addi
 Hope that helps! Let me know if you have any questions.
 ````
 
+## Implement the kmeans algorithm using the AI output?
+
 Sure - why not. Let's recapitulate what the kmers algorithm should do and check if we find the respective lines in the code.
 
 The data should already be in memory and it should be a ndarray. Here it is obviously called "data". But I would not like to have an Array2<f64> back.
-This function should rather return a Vec<usize>. Keep that in mind for later.
+This function should rather return the cluster identities for each row as a Vec<usize>. Keep that in mind for later.
 
-Next in the kmeans algorithm is to select a random set of initial 'centromers'. This step is totally missing here.
+The next step in the kmeans algorithm is to select a random set of initial 'centromers'. This step is totally missing in the AI function.
 To select a random set of starting rows we need a random number generator. In Rust this works like that:
 
 ```
@@ -84,7 +86,7 @@ let mut rng = rand::thread_rng();
 rng.gen_range(0..100); // gives a random number in this range.
 ```
 
-Next we loop until convergence is reached. That is not good. 
+Next we loop until convergence is reached. That is fine. 
 BUT we do not want the program to end in an endless loop. 
 Add another variable called max_it:usize and use this in a 'for' loop.
 
@@ -296,3 +298,4 @@ mod tests {
 
 ```
 
+Add these tests BEFORE you implement the functions. This way you have a simple test to check if it does work ;-)
