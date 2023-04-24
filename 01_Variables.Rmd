@@ -8,13 +8,10 @@ Usize is the default integer type and is dependent on your computer type. On 64 
 
 # Examples
 
-For now we will use the extendr package to make this run in Rmd:
+This is code working in RStudio is you install the rextendr R package. I used this here simply to show you how variables are defined and how to break this simple logics.
 
-```{r, eval=FALSE}
-remotes::install_github("extendr/rextendr")
-```
 
-And now we can actually look into what the variables contain:
+(Using RStudio at the moment) I now can actually look into what the variables contain using an externdr R code:
 
 ```{extendr}
 let x = 5;
@@ -23,6 +20,8 @@ let z = x*y;
 
 rprintln!("{x} * {y} = {z}");
 ```
+
+This is Rust code interpreted by R. Therefore you need to use the Rust way to define variables using "let <varname> = <value>".
 
 So what about strings?
 
@@ -34,14 +33,15 @@ rprintln!("{seq}");
 rprintln!("{bseq:?}");
 ```
 
+Sequences can also be compacted using two bit per nucleotide and then a single u64 can contain the same info as a 32bp Sting.
+With being an integer this representation of a DNA sequence opens up possibilities that you do simply not have in R.
 
 # Create a new Rust program 
 
-I do not use Rust from within R, hence I can not teach that.
-It also makes more sense to me to compile Rust programs and use them on the command line.
+Rust is a compiled language and therefore interacting with it using a jupyter notebook or Rmd file does limit the languae a lot.
+Therefore it makes more sense to compile Rust programs and use them on the command line. 
 
-
-As an example of why I deliberately broke the integer example:
+As an example of why - I deliberately broke the integer example:
 
 ```
 let x:u8 = 5;
@@ -71,9 +71,9 @@ cargo build -r
 
 That was fun. 
 
-# A small Rust program with a function
+# More complicated error hunting:
 
-Now we need to dig deeper and I recommend you to use your programming IDE of choice to look into a different broken program. Rstudio would also do.
+Now we need to dig deeper and I recommend you to use your programming IDE of choice to look into a new broken program. Rstudio would also do.
 
 Lets look in the simple_problem folder in [this github repo](https://github.com/stela2502/Rust_Programming_1).
 

@@ -39,9 +39,22 @@ Programming is like any skill, the more you practice the better you get. ***It's
 
 ## Why Use Rust?
 
-You should only use Rust if a process you frequently use takes a lot of time. Rust in general is easily 10 times faster than R or Python. In general you can compare Rust with C and C++, but programming in Rust is WAY easier than programming in C or C++.
+- Rust is a compiled language and very fast.
+- Rust is very strict with access rights to variables and this adds to security
+- The Rust compiler is EXTREMELY helpful and therefore coding is easier as in e.g. C++
 
-Why? Because the Rust compiler is a work of art. We will come to that - soon!
+This said coding in Rust is still more complicated than in R or Python. Therefore you should probably only use Rust if a process you frequently use takes a lot of time. Rust in general is easily 10 times faster than R or Python. You can compare Rust with C and C++, but programming in Rust is WAY easier than programming in C or C++. If you want to read more about that I recommend this source: https://combine-lab.github.io/blog/.
+
+A short boil down: Rust is cool - mainly because the Rust compiler/package manager (cargo) is a work of art, the programs are really fast and the memory management makes up to be a very secure language.
+
+## Which projects use Rust?
+
+A very short list:
+
+- CellRanger
+- alevin-fry
+
+Even this extremely short list points to the main benefit of Rust - speed.
 
 ## How will this course work?
 
