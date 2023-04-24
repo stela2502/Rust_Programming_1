@@ -3,3 +3,6 @@ delete_merged_file: true
 language:
   ui:
     chapter_name: " "
+output:
+  bookdown::gitbook:
+    highlight: tango

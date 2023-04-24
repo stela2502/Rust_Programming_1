@@ -464,12 +464,33 @@ one.</p>
 </div>
 <div id="why-use-rust" class="section level2">
 <h2>Why Use Rust?</h2>
-<p>You should only use Rust if a process you frequently use takes a lot
-of time. Rust in general is easily 10 times faster than R or Python. In
-general you can compare Rust with C and C++, but programming in Rust is
-WAY easier than programming in C or C++.</p>
-<p>Why? Because the Rust compiler is a work of art. We will come to that
-- soon!</p>
+<ul>
+<li>Rust is a compiled language and very fast.</li>
+<li>Rust is very strict with access rights to variables and this adds to
+security</li>
+<li>The Rust compiler is EXTREMELY helpful and therefore coding is
+easier as in e.g. C++</li>
+</ul>
+<p>This said coding in Rust is still more complicated than in R or
+Python. Therefore you should probably only use Rust if a process you
+frequently use takes a lot of time. Rust in general is easily 10 times
+faster than R or Python. You can compare Rust with C and C++, but
+programming in Rust is WAY easier than programming in C or C++. If you
+want to read more about that I recommend this source: <a href="https://combine-lab.github.io/blog/" class="uri">https://combine-lab.github.io/blog/</a>.</p>
+<p>A short boil down: Rust is cool - mainly because the Rust
+compiler/package manager (cargo) is a work of art, the programs are
+really fast and the memory management makes up to be a very secure
+language.</p>
+</div>
+<div id="which-projects-use-rust" class="section level2">
+<h2>Which projects use Rust?</h2>
+<p>A very short list:</p>
+<ul>
+<li>CellRanger</li>
+<li>alevin-fry</li>
+</ul>
+<p>Even this extremely short list points to the main benefit of Rust -
+speed.</p>
 </div>
 <div id="how-will-this-course-work" class="section level2">
 <h2>How will this course work?</h2>
@@ -502,15 +523,19 @@ u64.</p>
 </div>
 <div id="examples" class="section level1">
 <h1>Examples</h1>
-<p>For now we will use the extendr package to make this run in Rmd:</p>
-<pre class="r"><code>remotes::install_github(&quot;extendr/rextendr&quot;)</code></pre>
-<p>And now we can actually look into what the variables contain:</p>
+<p>This is code working in RStudio is you install the rextendr R
+package. I used this here simply to show you how variables are defined
+and how to break this simple logics.</p>
+<p>(Using RStudio at the moment) I now can actually look into what the
+variables contain using an externdr R code:</p>
 <pre class="rust"><code>let x = 5;
 let y = 7;
 let z = x*y;
 
 rprintln!(&quot;{x} * {y} = {z}&quot;);</code></pre>
 <pre><code>## 5 * 7 = 35</code></pre>
+<p>This is Rust code interpreted by R. Therefore you need to use the
+Rust way to define variables using “let <varname> = <value>”.</p>
 <p>So what about strings?</p>
 <pre class="rust"><code>let seq = &quot;AGCT&quot;;
 let bseq = b&quot;AGCT&quot;;
@@ -519,13 +544,18 @@ rprintln!(&quot;{seq}&quot;);
 rprintln!(&quot;{bseq:?}&quot;);</code></pre>
 <pre><code>## AGCT
 ## [65, 71, 67, 84]</code></pre>
+<p>Sequences can also be compacted using two bit per nucleotide and then
+a single u64 can contain the same info as a 32bp Sting. With being an
+integer this representation of a DNA sequence opens up possibilities
+that you do simply not have in R.</p>
 </div>
 <div id="create-a-new-rust-program" class="section level1">
 <h1>Create a new Rust program</h1>
-<p>I do not use Rust from within R, hence I can not teach that. It also
-makes more sense to me to compile Rust programs and use them on the
-command line.</p>
-<p>As an example of why I deliberately broke the integer example:</p>
+<p>Rust is a compiled language and therefore interacting with it using a
+jupyter notebook or Rmd file does limit the languae a lot. Therefore it
+makes more sense to compile Rust programs and use them on the command
+line.</p>
+<p>As an example of why - I deliberately broke the integer example:</p>
 <pre><code>let x:u8 = 5;
 let y:u16 = 7;
 let z = x*y;
@@ -568,11 +598,11 @@ cargo build -r</code></pre>
 ## error: could not compile `workshop` due to 2 previous errors</code></pre>
 <p>That was fun.</p>
 </div>
-<div id="a-small-rust-program-with-a-function" class="section level1">
-<h1>A small Rust program with a function</h1>
+<div id="more-complicated-error-hunting" class="section level1">
+<h1>More complicated error hunting:</h1>
 <p>Now we need to dig deeper and I recommend you to use your programming
-IDE of choice to look into a different broken program. Rstudio would
-also do.</p>
+IDE of choice to look into a new broken program. Rstudio would also
+do.</p>
 <p>Lets look in the simple_problem folder in <a href="https://github.com/stela2502/Rust_Programming_1">this github
 repo</a>.</p>
 <p>Download (clone) the repo using git
