@@ -11,7 +11,7 @@
 
 <meta name="author" content="Stefan Lang" />
 
-<meta name="date" content="2023-03-31" />
+<meta name="date" content="2023-04-24" />
 
 <title>An introduction to Rust programming</title>
 
@@ -440,7 +440,7 @@ display: none;
 
 <h1 class="title toc-ignore">An introduction to Rust programming</h1>
 <h4 class="author">Stefan Lang</h4>
-<h4 class="date">2023-03-31</h4>
+<h4 class="date">2023-04-24</h4>
 
 </div>
 
@@ -635,41 +635,98 @@ mod tests {
 <!--chapter:end:01_Variables.Rmd-->
 </div>
 <div id="how-do-you-get-data-into-rust" class="section level1">
-<h1>How do you get data into Rust</h1>
+<h1>How do you get data into Rust?</h1>
 <p>Getting data into a compiled langue has always been a problem for me.
 Hence I’ll tell you how I finally managed to get data into Rust - just
 copy paste the solution - I do the same.</p>
-<p>Lets look into the folder ‘read_data’. This Rust package actually not
-only contains a main.rs, but also a lib.rs and data.rs. The lib.rs is
-the file where all library files in your package are defined. And all
-other files can be included there. Just follow the example.</p>
-<p>I actually have copied the library file from my simulated_anealing
-Rust project. You will also implement something like that in Rust at the
-end and I hope this little primer brings you up to speed now.</p>
+<p>The git repo contains a folder ‘read_data’ that is a simple Rust
+package. Looking into it you see a Cargo.toml. This file describes your
+package and is comparable to the R DESCRIPTION file. Here you define the
+package and the dependancies. Just look into the example. It should be
+self explanatory.</p>
+<p>The src folder contains the code files with main.rs defining the
+executable, and the lib.rs defining the library part of the package. The
+additional data.rs file contains the code for the library in this
+package and needs to be mentioned in the lib.rs file to be compiled.</p>
 <p>Let’s dig through the library.</p>
-<p>Start with the main.rs file. This is what will be compiled to be the
-executable. The program starts with the main function.</p>
-<p>The top 7 lines load libraries with line 7 loading the included Data
-class.</p>
-<p>The following structure is a way to get command line options into the
-program. This struct ‘Opts’ defines the command line options available
-for this program. We have here a data which is a String and contains a
-default value (out test dataset) and a ‘sep’ that is a default ’ here as
-the Spellman_Yeast_Cell_Cycle.csv table is actually tab separated.</p>
-<p>The main function first starts a timer (I think it is useful most of
-the times) and reads the command line option in. The ’ has been a little
-buit a problem for me and here you see my solution to that.</p>
-<p>All the Main really does here is to load the data with the line
-<code>let data = Data::read_file( &amp;opts.data, sep)</code>. And print
-the contents with the next line. Afterwards there is a lot of time
-calculation and a statement how long the process did take.</p>
-<p>So all the fun has to be coded somewhere else.</p>
-<p>Let’s look into the lib.rs file.</p>
+<div id="start-with-the-main.rs-file." class="section level3">
+<h3>Start with the main.rs file.</h3>
+<p>This file will be compiled to be the executable. The program starts
+with the main function.</p>
+<ul>
+<li>lines 0..7 import the used classes</li>
+<li>lines 13..22 define the command line options</li>
+<li>lines 24..55 define the main function</li>
+</ul>
+<p>In the code most of this is a timer functionality that I do think is
+extremely useful.</p>
+<pre><code>let now = SystemTime::now();
+
+...
+
+match now.elapsed() {
+    Ok(elapsed) =&gt; {
+        let mut milli = elapsed.as_millis();
+        
+        let mil = milli % 1000;
+        milli= (milli - mil) /1000;
+
+        let sec = milli % 60;
+        milli= (milli -sec) /60;
+
+        let min = milli % 60;
+        milli= (milli -min) /60;
+
+        println!(&quot;finished in {milli} h {min} min {sec} sec {mil} milli sec&quot;);
+    },
+    Err(e) =&gt; {println!(&quot;Error: {e:?}&quot;);}
+}</code></pre>
+<p>Using ‘let <var_name>: <type> = <value>’ defines variables in Rust.
+The type does not need to be included in the definition if the compiler
+can identify the type itself.</p>
+<p>The ‘match’ part is the main Rust error handling functionality.</p>
+<p>The next bigger part is the reading of the command line options:
+‘now.elapsed()’ is a function that can fail and therefore returns a
+“Result&lt;Duration, SystemTimeError&gt;” instead of only a Duration.
+This allows for the match to check if an error has occured:</p>
+<pre><code>match &lt;statement&gt; {
+    Ok(&lt;varname&gt;) =&gt; { &lt;do something with the variable&gt; },
+    Err(e) =&gt; { &lt;do something with the error&gt; }#
+};</code></pre>
+<p>I am sure you will like this ;-)</p>
+<p>The next part reads the command line options into the program:</p>
+<pre><code>let opts: Opts = Opts::parse();
+let mut sep = &#39;\t&#39;;
+if &amp;opts.sep != &quot;\\t&quot;{
+    println!(&quot;I set sep to {}&quot;, opts.sep );
+    sep = opts.sep.chars().next().unwrap(); 
+}</code></pre>
+<p>This first parses the command line. The rest is my way to handle the
+problem that you can not give Rust a ’ as char as that can only contain
+one literal. So I have used the tab as default instead of dealing with
+this problem in any other way.</p>
+<p>This leaves us with the final ‘work’ the tool does is in these
+lines:</p>
+<pre><code>let data = Data::read_file( &amp;opts.data , sep );
+data.print();</code></pre>
+<p>This first defines a data variable using the <a href="Data::read_file" class="uri">Data::read_file</a>() function and
+then uses the <a href="Data::print" class="uri">Data::print</a>()
+function to print the contens of the data object.</p>
+</div>
+<div id="the-lib.rs-file" class="section level3">
+<h3>The lib.rs file</h3>
 <pre><code>pub mod data;</code></pre>
 <p>Oh that is boring. It only imports the thingsfrom data.rs…</p>
 </div>
-<div id="the-data-class" class="section level1">
-<h1>The Data class</h1>
+<div id="the-data.rs-file" class="section level3">
+<h3>The data.rs file</h3>
+<p>This file now defines the Data class.</p>
+<ul>
+<li>lines 0..9 define the dependencies</li>
+<li>lines 11..19 define the data part of the class</li>
+<li>lines 22..196 code the functions</li>
+<li>lines 198..217 implement the tests for this class</li>
+</ul>
 <p>A class in Rust is defined by creating the data structure for the
 class (struct Data {}) and then implementing functions for the class
 (impl Data {}). Functions can be defined with</p>
@@ -693,24 +750,21 @@ class (struct Data {}) and then implementing functions for the class
         store,
     }
 }</code></pre>
-<p>Here we define the class contents and return a Self object.</p>
-<p>The read_file funciton is more interesting as it contains an example
-of how Rust handles errors:</p>
-<pre><code>match line {
-    Ok(line) =&gt; {
-        .
-        .
-        .
-    },
-    Err(err) =&gt; {
-        panic!(&quot;Unexpected error reading the csv file: {err:?}&quot;);
-    }
-}</code></pre>
-<p>The ‘line’ object is one line in the data file and the function I
-used to get this data returns a ‘Result’ - meaning it is normal that
-thif function might not work. And this is the common way to treat a
-Result. You can also stack these as you can see in the previousely
-hidden code of the function:</p>
+<p>Here we define the class contents and return a Self object - special
+focus on the missing ‘;’ in the end…</p>
+</div>
+<div id="the-read_file-function" class="section level3">
+<h3>The read_file function</h3>
+<p>The read_file function shows a general problem of compiled languages.
+Normally you should know how much data you want to store in the objects
+as the memory needs to be requested per variable. Adding more ‘space’ to
+a variable is quite costy. Hence here we iterate over the data twice.
+Lines 47..62 read the data and ‘only’ collect the column and row
+counts.</p>
+<p>The ‘line’ object contains one line of the data file and the
+reader.lines() function returns a ‘Result’ - meaning it is normal that
+this function might not work. And - again - this is the common way to
+treat a Result:</p>
 <pre><code>header =true;
 for mut val in line.split( sep ).collect::&lt;Vec&lt;&amp;str&gt;&gt;(){
     if header{
@@ -748,23 +802,11 @@ variables in the vector that I want to be able to modify.</p>
 remove whitespace from the strings. This is necessary as ” 2” can not be
 parsed as 2:<usize>. Tried that and it broke ;-) Rust also does not want
 to parse an int as float and vice versa. So therfore I need to
-differentiate between the two options here.</p>
+differentiate between the two options here, too.</p>
 <p>I assume you can see what is going on here? What does this function
 do?</p>
-</div>
-<div id="excercise" class="section level1">
-<h1>Excercise</h1>
-<p>Try to use this example and implement a kmeans algorithm based on the
-Data class from the last example. The kmeans function should be defined
-in the Data class and the input to this function should be the Data
-class itself. You can then change the ‘data’ variable to &amp;self in
-the function and to self.data in the function body.</p>
-<p>I assume it is bad habbit to just add the two other functions there,
-too, but just do it for now. We are not hard core programmers after all
-:-D</p>
-<p>Make the kmeans function public and call it in the main.rs script.
-You need to add tow additional values to the options.</p>
 <!--chapter:end:02_LoadData.Rmd-->
+</div>
 </div>
 <div id="use-the-data-class-to-implement-a-kmeans-algorithm" class="section level1">
 <h1>Use the Data class to implement a kmeans algorithm</h1>
@@ -832,27 +874,33 @@ The implementation should be fairly self-explanatory, but I&#39;ll provide some 
     The mean_axis() method is used to compute the mean of the rows belonging to a given cluster.
 
 Hope that helps! Let me know if you have any questions.</code></pre>
+<div id="implement-the-kmeans-algorithm-using-the-ai-output" class="section level2">
+<h2>Implement the kmeans algorithm using the AI output?</h2>
 <p>Sure - why not. Let’s recapitulate what the kmers algorithm should do
 and check if we find the respective lines in the code.</p>
-<p>The data should already be in memory and the data should be a
-ndarray. Here it is obviously called “data”. But I would not like to
-have an Array2<f64> back. This data should rather be a Vec<usize>. Keep
-that in mind for later.</p>
-<p>Next in the kmeans algorithm is to select a random set of initial
-‘centers’. This step is totally missing here. We need a random number
-generator here:</p>
+<p>The data should already be in memory and it should be a ndarray. Here
+it is obviously called “data”. But I would not like to have an
+Array2<f64> back. This function should rather return the cluster
+identities for each row as a Vec<usize>. Keep that in mind for
+later.</p>
+<p>The next step in the kmeans algorithm is to select a random set of
+initial ‘centromers’. This step is totally missing in the AI function.
+To select a random set of starting rows we need a random number
+generator. In Rust this works like that:</p>
 <pre><code>use rand::Rng;
 let mut rng = rand::thread_rng();
 rng.gen_range(0..100); // gives a random number in this range.</code></pre>
-<p>Next we loop until convergence is reached. That is not good. We do
+<p>Next we loop until convergence is reached. That is fine. BUT we do
 not want the program to end in an endless loop. Add another variable
-called max_it:usize adn use this in a for loop.</p>
+called max_it:usize and use this in a ‘for’ loop.</p>
+</div>
 </div>
 <div id="lets-walk-through" class="section level1">
 <h1>Let’s walk through:</h1>
-<div id="change-the-data-type-the-return-value-and-add-a-way-to-select-the-initial-set-of-centroids." class="section level2">
-<h2>Change the data type, the return value and add a way to select the
-initial set of centroids.</h2>
+<div id="change-the-data-type-to-the-type-we-have-in-our-read_data-the-return-value-and-add-a-way-to-select-the-initial-random-set-of-centroids." class="section level2">
+<h2>Change the data type (to the type we have in our read_data), the
+return value and add a way to select the initial random set of
+centroids.</h2>
 <pre><code>use ndarray::ArrayBase;
 use rand::Rng;
 
@@ -877,8 +925,9 @@ fn kmeans(data: &amp;ArrayBase&lt;ndarray::OwnedRepr&lt;f64&gt;, Dim&lt;[usize; 
 <div id="should-we-have-more-functions" class="section level2">
 <h2>Should we have more functions?</h2>
 <p>Now we would select the labels - a vector stating the closest
-‘centroid’ for each row of the data. This function should compare the
-centroids to every row of the data.</p>
+‘centroid’ for each row of the data. But we will need this functionality
+also in the loop. Hence I would implement a function to do that. This
+function should compare the centroids to every row of the data.</p>
 <pre><code>use ndarray::ArrayBase;
 use rand::Rng;
 
@@ -893,7 +942,7 @@ fn asign_labels(data: &amp;ArrayBase&lt;ndarray::OwnedRepr&lt;f64&gt;, Dim&lt;[u
             let distance = (data.slice(s![i, ..]) - centroids.slice(s![j, ..])).norm();
             if distance &lt; min_distance {
                 min_distance = distance;
-                labels[[i, 0]] = j;
+                labels[i] = j;
             }
         }
     }
@@ -921,7 +970,9 @@ fn kmeans(data: &amp;ArrayBase&lt;ndarray::OwnedRepr&lt;f64&gt;, Dim&lt;[usize; 
 <div id="add-a-function-to-calculate-the-centroids" class="section level2">
 <h2>Add a function to calculate the centroids</h2>
 <p>The next time we get the centroids will be more complicated. I like
-functions as one could also create specific tests for each function.</p>
+functions as one can also create specific tests for each function. AND
+THAT IS SOMETHING WE SHOULD REALLY DO!</p>
+<p>But first the calculate_centroids function:</p>
 <pre><code>use ndarray::ArrayBase;
 use rand::Rng;
 
@@ -967,10 +1018,11 @@ fn kmeans(data: &amp;ArrayBase&lt;ndarray::OwnedRepr&lt;f64&gt;, Dim&lt;[usize; 
         centroids.row_mut(i).assign(&amp;self.data.row(sample_idx));
     }
     let mut labels = asign_labels( data, centroids );
+    let mut new_labels:Vec&lt;usize&gt;;
 
     for it in 0..max_it{
         calculate_centroids( data, labels, k, centroids );
-        let new_labels = asign_labels( data, centroids );
+        new_labels = asign_labels( data, centroids );
         if new_labels == labels{
             print(&quot;converged after {it} itherations&quot;);
             break;
@@ -987,21 +1039,22 @@ fn kmeans(data: &amp;ArrayBase&lt;ndarray::OwnedRepr&lt;f64&gt;, Dim&lt;[usize; 
 <p>As we now have so many nice functions that could be tested - lets add
 some tests:</p>
 <p>Oh - now we actually neeed some data in this. :-(</p>
-<p>Let’s combine the kmeans with the Data object we had as an example
-before.</p>
+<p>Let’s combine the kmeans functionality with the Data object we had as
+an example before.</p>
 <p>Copy the read_data folder and name it kmeans. Now you need to change
 the Cargo.toml: read_data -&gt; kmeans.</p>
 <p>You could compile it and check if it is working.</p>
 <p>Add the kmeans functionality to the Data class or to the main.rs
 script. This will take some time - I will help you, but there will be no
 help in this document.</p>
-<p>We go on weith the testing here:</p>
+<p>We go on with the testing here:</p>
 <pre><code>
 #[cfg(test)]
 mod tests {
 
     use crate::data::Data;
     use ndarray::Axis;
+    use ndarray::ArrayBase;
 
     #[test]
     fn check_kmeans() {
@@ -1017,7 +1070,10 @@ mod tests {
 
     #[test]
     fn check_calculate_centroids() {
-
+        let mut data = Data::read_file( &amp;&quot;testData/CellexalVR_TestData_tsne.csv&quot;.to_string(), &#39;,&#39; );
+        data.scale();
+        
+        Data::calculate_centroids();
     }
 
     #[test]
@@ -1027,6 +1083,8 @@ mod tests {
 
 }
 </code></pre>
+<p>Add these tests BEFORE you implement the functions. This way you have
+a simple test to check if it does work ;-)</p>
 <!--chapter:end:03_Kmeans.Rmd-->
 </div>
 
