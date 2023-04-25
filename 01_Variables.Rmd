@@ -29,7 +29,7 @@ rprintln!("{x} * {y} = {z}");
 
 The print statement here is not Rust but specific for the R extension rextendr.
 The Rust equivalent to the rptintln!() is println!().
-The interesting part here is how you define variables: "let <varname> = <value>;"
+The interesting part here is how you define variables: "let \<varname\>:\<type\> = \<value\>;"
 
 Why did we not define the type of integer we want to store?
 
@@ -56,10 +56,10 @@ rprintln!("{seq}");
 rprintln!("{bseq:?}");
 ```
 
-Strings are stored as char arrays (&[u8]), but the println! macro already formates the Strings to be human readable. The b"<sting>" formats the data not as Sting but as &[u8] and that needs to be printed using a different print statement. Quite different from R - or?
+Strings are (internally) stored as char arrays (&[u8]), but the println! macro already formates a \<String\> object to be human readable. The b"\<String\>" formats the data not as \<String> but as &[u8] and that needs to be printed using a different print statement, but shows the underlying numeric representation of the data. Quite different from R - or?
 
 
-Sequences can also be compacted using two bit per nucleotide and then a single u64 can contain the same info as a 32bp Sting.
+Sequences can also be compacted using two bit per nucleotide and then a single u64 can contain the same info as a 32bp String.
 With being an integer this representation of a DNA sequence opens up possibilities that you do simply not have in R.
 
 # Create a new Rust program 
@@ -95,7 +95,7 @@ cd workshop
 cargo build -r
 ```
 
-Here you see the output from the Rusr compiler. Do you see the beauty of this?
+Here you see the output from the Rust compiler. Do you see the beauty of this?
 The compiler explains the error and later on even points us to a possible solution:
 We could cast the u16 to u8 in the formular.
 
@@ -115,10 +115,11 @@ Now we need to dig deeper and I recommend you to use your programming IDE of cho
 
 Lets look in the simple_problem folder in [this github repo](https://github.com/stela2502/Rust_Programming_1).
 
-Download (clone) the repo using git ``git clone https://github.com/stela2502/Rust_Programming_1``. Open the folder 'simple_problem' in your IDE and open a terminal and cd into this folder.
+Download (clone) the repo using git ``git clone https://github.com/stela2502/Rust_Programming_1``. Open the folder 'simple_error' in your IDE and open a terminal and cd into this folder.
 
 There you run:
-```{bash, eval=F}
+```{bash,  error=TRUE}
+cd simple_error
 cargo build -r
 ```
 
@@ -134,9 +135,10 @@ Each line needs to end with a ';'. All but the last line in a function if you wa
 We do not have a 'data' variable in the sum function. Here the data is called 'v' - fix that.
 
 Now the code compiles:
-```{bash, eval=F}
+```{bash,  error=TRUE}
+cd simple_fixed
 cargo build -r
-target/release/simple_problem
+target/release/simple_error
 ```
 
 Does the output make sense?
@@ -178,7 +180,8 @@ mod tests {
 
 And now you can test your script by 
 
-```
+```{bash,  error=TRUE}
+cd simple_fixed
 cargo test -r
 ```
 

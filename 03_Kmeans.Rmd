@@ -1,7 +1,13 @@
 # Use the Data class to implement a kmeans algorithm
 
-Honestly - nowadays I never start anything without asking ChatGPT first.
-So why not use it here, too.
+Now you know how to create a package and even know how to load numeric tables into Rust.
+But how do we interact with this table and how does a kmeans algorithm work?
+
+I could of cause explain that in detail here, but that would not help you a lot - or?
+Instead I show you how I find this info nowadays:
+
+Honestly - I almost never start anything without asking ChatGPT first.
+So why not try it here, too.
 
 
 This is my conversation with ChatGPT:
@@ -74,8 +80,8 @@ Hope that helps! Let me know if you have any questions.
 
 Sure - why not. Let's recapitulate what the kmers algorithm should do and check if we find the respective lines in the code.
 
-The data should already be in memory and it should be a ndarray. Here it is obviously called "data". But I would not like to have an Array2<f64> back.
-This function should rather return the cluster identities for each row as a Vec<usize>. Keep that in mind for later.
+The data should already be in memory and it should be a ndarray. Here it is obviously called "data". But I would not like to have an Array2\<f64\> back.
+This function should rather return the cluster identities for each row as a Vec\<usize\>. Keep that in mind for later.
 
 The next step in the kmeans algorithm is to select a random set of initial 'centromers'. This step is totally missing in the AI function.
 To select a random set of starting rows we need a random number generator. In Rust this works like that:
@@ -177,7 +183,6 @@ The asign_labels function is mainly a straight copy from the initial AI result.
 
 The next time we get the centroids will be more complicated.
 I like functions as one can also create specific tests for each function.
-AND THAT IS SOMETHING WE SHOULD REALLY DO!
 
 But first the calculate_centroids function:
 
@@ -320,3 +325,27 @@ mod tests {
 ```
 
 Add these tests BEFORE you implement the functions. This way you have a simple test to check if it does work ;-)
+
+
+### Compile and test the kmeans program
+
+```{bash,  error=TRUE}
+cd kmeans_example
+cargo build -r
+target/release/kmeans -h
+```
+
+
+```{bash,  error=TRUE}
+cd kmeans_example
+target/release/kmeans -d testData/CellexalVR_TestData_tsne.csv -c 15 -s ','
+```
+
+```{r}
+clusters = read.delim('kmeans_example/testData/Clustering.txt', sep=",", row.names=1, header=F)
+head(clusters)
+data = read.delim( 'kmeans_example/testData/CellexalVR_TestData_tsne.csv', sep=",", row.names=1)
+head(data)
+
+plot( data[,1:2], col=rainbow(15)[clusters[,1]+1], pch=16)
+```

@@ -5,8 +5,7 @@ use std::time::SystemTime;
 use kmeans::data::Data;
 use std::io::Write;
 
-/// Run a simulated anealing clustering over the rows of the provided data. 
-/// The software is a demo project for the Lund Stem Cell Center - Bioinformatics Rust course.
+/// Calculate a kmeans clustering based on a numeric matrix.
 
 #[derive(Parser)]
 #[clap(version = "1.0.0", author = "Stefan L. <stefan.lang@med.lu.se>")]

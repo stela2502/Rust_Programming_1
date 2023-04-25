@@ -3,7 +3,7 @@
 Getting data into a compiled langue has always been a problem for me.
 Hence I'll tell you how I finally managed to get data into Rust - just copy paste the solution - I do the same.
 
-The git repo contains a folder 'read_data' that is a simple Rust package.
+The git repo contains a folder 'read_data' which is a simple Rust package.
 Looking into it you see a Cargo.toml. This file describes your package and is comparable to the R DESCRIPTION file.
 Here you define the package and the dependancies. Just look into the example. It should be self explanatory.
 
@@ -22,7 +22,7 @@ This file will be compiled to be the executable. The program starts with the mai
 - lines 13..22 define the command line options
 - lines 24..55 define the main function
 
-In the code most of this is a timer functionality that I do think is extremely useful.
+In the main function most of the code is a timer functionality that I do think is extremely useful.
 
 ```
 let now = SystemTime::now();
@@ -48,13 +48,13 @@ match now.elapsed() {
 }
 ```
 
-Using 'let <var_name>: <type> = <value>' defines variables in Rust.
+Using 'let \<var_name\>: \<type\> = \<value\>' defines variables in Rust.
 The type does not need to be included in the definition if the compiler can identify the type itself.
 
 
 The 'match' part is the main Rust error handling functionality. It is comparable to the C switch statement as it allows to match a value against multiple patterns and execute code based on the first matching pattern. 
 
-The function 'now.elapsed()' can fail and therefore returns a "Result<Duration, SystemTimeError>" instead of only a Duration.
+The function 'now.elapsed()' can fail and therefore returns a "Result\<Duration, SystemTimeError\>" instead of only a Duration.
 This allows for the match to check if an error has occured using the two functions Ok and Err that both take a Result as input:
 
 ```
@@ -78,7 +78,7 @@ if &opts.sep != "\\t"{
 }
 ```
 
-The first line parses the command line. The rest is my way to handle the problem that you can not give Rust a '\t' on the command line as the used char class can only contain one literal.
+The first line parses the command line. The rest is my way to handle the problem that you can not give Rust a '\\t' on the command line as the used char class can only contain one literal.
 So I have used the tab as default instead of dealing with this problem in any other way.
 
 **The reading and printing of the data table**
@@ -134,9 +134,9 @@ pub fn new( rows:usize, cols:usize, data: Vec::<f64>, rownames: Vec::<String> ) 
 }
 ```
 
-First this function takes ownership of the data using the into_iter() function. This means that we can no longer access data in the main function. This is part of Rusts more secure memory management: Only one function can have access to the data.
+First this function takes ownership of the data using the into_iter() function. This means that we can no longer access data in the main function. This is part of Rusts more secure memory management: Only one function can have access to the data. We then create an Array object from this data. And finally we re-format the data into a two dimensional table.
 
-The Self{} statement creates the object from it's parts. Here we have the rows, cols, the rownames from the function call and the data array. 
+The Self{} statement creates the object from it's parts. Here we have the rows, cols, the rownames (from the function call) and the data array. 
 
 This is quite simple - or?
 
@@ -150,28 +150,43 @@ The 'line' object contains one line of the data file and the reader.lines() func
 And - again - this is the common way to treat a Result in Rust:
 
 ```
-header =true;
-for mut val in line.split( sep ).collect::<Vec<&str>>(){
+let mut header =true;
+for line in reader.lines() {
     if header{
-        names.push( val.to_string() );
+        // just drop the header
         header = false;
-    }else {
-    	val = val.trim();
-        let v = match val.parse::<f64>() {
-            Ok( v ) => v,
-            Err(_err) => {
-                match val.parse::<usize>(){
-                    Ok(v) =>  { 
-                        v as f64
-                    },
-                    Err(err) => {
-                        eprintln!("I could not parse '{val}' to usize or f64 {err:?}");
-                        0.0
-                    },
+        continue;
+    }
+    match line {
+        Ok(line) => {
+            header =true;
+            for mut val in line.split( sep ).collect::<Vec<&str>>(){ ## here is the mut!
+                if header{
+                    names.push( val.to_string() );
+                    header = false;
+                }else {
+                    val = val.trim();
+                    let v = match val.parse::<f64>() {
+                        Ok( v ) => v,
+                        Err(_err) => {
+                            match val.parse::<usize>(){
+                                Ok(v) =>  { 
+                                    v as f64
+                                },
+                                Err(err) => {
+                                    eprintln!("I could not parse '{val}' to usize or f64 {err:?}");
+                                    0.0
+                                },
+                            }
+                        },
+                    };
+                    arr.push( v );
                 }
-            },
-        };
-        arr.push( v );
+            }
+        },
+        Err(err) => {
+            panic!("Unexpected error reading the csv file: {err:?}");
+        }
     }
 }
 ```
@@ -183,11 +198,26 @@ So whenever you want to asigne a value to a variable more than once you need to 
 for mut val in line.split( sep ).collect::<Vec<&str>>()
 ```
 
-Translates to: split the line by 'sep' and give me ownership of the variables you create as Vec<&str>; iterate over the variables in the vector that I want to be able to modify.
+Translates to: split the line by 'sep' and give me ownership of the variables you create as Vec\<&str\>; iterate over the variables in the vector that I want to be able to modify.
 
-Where do we modify the value? ``val = val.trim();`` does remove whitespace from the strings. This is necessary as " 2" can not be parsed as 2:<usize>. Tried that and it broke ;-)
+Where do we modify the value? ``val = val.trim();`` does remove whitespace from the strings. This is necessary as " 2" can not be parsed as 2:\<usize\>. Tried that and it broke ;-)
 Rust also does not want to parse an int as float and vice versa. So therfore I need to differentiate between the two options here, too. 
 
 The only other interesting part here is the ``let v = match val.parse::<f64>() {``. This tries to convert the data into a f64 and if that fails it converts it to a usize. And if both ties fail it throws an error, but does not break. It returns 0.0 (a f64) by default.
 
 
+### And now try the tool:
+
+
+```{bash,  error=TRUE}
+cd read_data
+cargo build -r
+target/release/read_data -h
+```
+
+And we can even run the test with some data file:
+
+```{bash,  error=TRUE}
+cd read_data
+target/release/read_data -d testData/Spellman_Yeast_Cell_Cycle.tsv
+```

@@ -5,14 +5,15 @@ fn main() {
 
     let res = sum( &data, &ids );
 
-    println!("Summing up these ids ({:?}) of the data ({:?}) = {res}", ids, data );
+    //println!("Summing up these ids ({:?}) of the data ({:?}) = {res}", ids, data );
+    println!("Summing up these ids ({:?}) of the data ({:?}) = {res}", data, ids );
 }
 
 
 fn sum( v:&Vec<usize>, ids:&Vec<usize> ) -> usize {
     let mut sum = 0;
     for i in 0..ids.len(){
-        sum += v[ids[i]];
+        sum += v[i];
     }
     sum
 }

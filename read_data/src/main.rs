@@ -5,8 +5,7 @@ use std::time::SystemTime;
 use read_data::data::Data;
 
 
-/// Run a simulated anealing clustering over the rows of the provided data. 
-/// The software is a demo project for the Lund Stem Cell Center - Bioinformatics Rust course.
+/// Example of how to load numeric data from a tab separated text file into Rust.
 
 #[derive(Parser)]
 #[clap(version = "1.0.0", author = "Stefan L. <stefan.lang@med.lu.se>")]
