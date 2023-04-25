@@ -272,19 +272,27 @@ mod tests {
 
     use crate::data::Data;
     use ndarray::Axis;
-    use ndarray::ArrayBase;
-
+    use ndarray::s;
 
     #[test]
     fn check_asign_labels() {
-        let mut data = Data::read_file( &"testData/CellexalVR_TestData_tsne.csv".to_string(), ',' );
-        let mut centroids = data.slice(s![..10, ..]).to_owned();
-        let mut labels Vec<usize>::with_capacity( data.nrows() );
-        data.calculate_centroids( centroids, labels )
+        let data = Data::read_file( &"testData/CellexalVR_TestData_tsne.csv".to_string(), ',' );
+        let centroids = data.data.slice(s![..10, ..]).to_owned();
+        let kmeans = data.asign_labels( &centroids );
+        let mut min = usize::MAX;
+        let mut max = usize::MIN;
+        for k in &kmeans {
+            if min > *k{
+                min = *k;
+            }
+            if max < *k{
+                max = *k;
+            }
+        }
+        assert_eq!( [min, max], [0,9] );
     }
 
-
-    #[test]
+     #[test]
     fn check_kmeans() {
 
         let mut data = Data::read_file( &"testData/CellexalVR_TestData_tsne.csv".to_string(), ',' );
@@ -292,13 +300,19 @@ mod tests {
         let kmeans = data.kmeans( 15, 15000 );
         assert_eq!( kmeans.len(), data.data.len_of(Axis(0)) );
 
-        let exp:Vec<usize> = vec![0; data.data.len_of(Axis(0)) ];
-        assert!( kmeans != exp, "the kmeans values are not zero" );
-    }
+        //let exp:Vec<usize> = vec![0; data.data.len_of(Axis(0)) ];
 
-    #[test]
-    fn check_calculate_centroids() {
-        // implement that if you like - I do not want to :-D
+        let mut min = usize::MAX;
+        let mut max = usize::MIN;
+        for k in kmeans {
+            if min > k{
+                min = k;
+            }
+            if max < k{
+                max = k;
+            }
+        }
+        assert_eq!( [min , max ], [0, 14] );
     }
 
 }

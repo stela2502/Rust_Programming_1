@@ -188,6 +188,6 @@ Translates to: split the line by 'sep' and give me ownership of the variables yo
 Where do we modify the value? ``val = val.trim();`` does remove whitespace from the strings. This is necessary as " 2" can not be parsed as 2:<usize>. Tried that and it broke ;-)
 Rust also does not want to parse an int as float and vice versa. So therfore I need to differentiate between the two options here, too. 
 
-The only other interesting part here is the ``let v = match val.parse::<f64>() {``. This tries to convert the data into a f64 and if that fails it converts it to a usize. And if both ties fail it throws an error, but does not brak. It returns 0.0 (a f64) by default.
+The only other interesting part here is the ``let v = match val.parse::<f64>() {``. This tries to convert the data into a f64 and if that fails it converts it to a usize. And if both ties fail it throws an error, but does not break. It returns 0.0 (a f64) by default.
 
 
