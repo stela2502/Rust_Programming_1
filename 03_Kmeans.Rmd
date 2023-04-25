@@ -349,3 +349,15 @@ head(data)
 
 plot( data[,1:2], col=rainbow(15)[clusters[,1]+1], pch=16)
 ```
+
+
+And at the end - does the R outperform Rust? I assume kmeans is coded in C anyhow. But what about loading the data?
+
+```{r}
+start_time <- Sys.time()
+data = read.delim( 'kmeans_example/testData/CellexalVR_TestData_tsne.csv', sep=",", row.names=1)
+cl = kmeans( data, 15)
+end_time <- Sys.time()
+print(end_time - start_time)
+plot( data[,1:2], col=rainbow(15)[cl$cluster], pch=16)
+```
