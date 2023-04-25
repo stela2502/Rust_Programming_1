@@ -11,7 +11,7 @@
 
 <meta name="author" content="Stefan Lang" />
 
-<meta name="date" content="2023-04-24" />
+<meta name="date" content="2023-04-25" />
 
 <title>An introduction to Rust programming</title>
 
@@ -440,7 +440,7 @@ display: none;
 
 <h1 class="title toc-ignore">An introduction to Rust programming</h1>
 <h4 class="author">Stefan Lang</h4>
-<h4 class="date">2023-04-24</h4>
+<h4 class="date">2023-04-25</h4>
 
 </div>
 
@@ -513,9 +513,9 @@ define your variables as a specific type. As an example you can store
 integer values as u8, u16, u32, u64, u128, i8, i16, i32, i64, i128,
 usize or integer. All of these types can not be compared against each
 other. So if you want to create some data structures it does help to
-choose the same type for all data (eg. integers). The difference between
-the integer types are the range of values they can contain: u8 and i8
-are 8 bit long whereas u128 and i128 are 128 bit long; the u types are
+choose the same type for all data (eg. u64). The difference between the
+integer types are the range of values they can contain: u8 and i8 are 8
+bit long whereas u128 and i128 are 128 bit long; the u types are
 unsigned and can not contain negative values. Usize is the default
 integer type and is dependent on your computer type. On 64 bit computers
 it is the same as a u64 - but you still can not compare it directly to
@@ -523,36 +523,60 @@ u64.</p>
 </div>
 <div id="examples" class="section level1">
 <h1>Examples</h1>
-<p>This is code working in RStudio is you install the rextendr R
-package. I used this here simply to show you how variables are defined
-and how to break this simple logics.</p>
-<p>(Using RStudio at the moment) I now can actually look into what the
-variables contain using an externdr R code:</p>
+<p>Writing this tutorial in RStudio I want to show you the pure basics
+of Rust:</p>
+<ul>
+<li>define a variable</li>
+<li>do a small calculation</li>
+</ul>
+<p>I used this here simply to show you how variables are defined and how
+to break this simple logics.</p>
+<div id="integers" class="section level3">
+<h3>Integers</h3>
+<p>Using RStudio at the moment I can show you how you define a variable
+in Rust:</p>
 <pre class="rust"><code>let x = 5;
 let y = 7;
 let z = x*y;
 
 rprintln!(&quot;{x} * {y} = {z}&quot;);</code></pre>
-<pre><code>## 5 * 7 = 35</code></pre>
-<p>This is Rust code interpreted by R. Therefore you need to use the
-Rust way to define variables using “let <varname> = <value>”.</p>
+<p>The print statement here is not Rust but specific for the R extension
+rextendr. The Rust equivalent to the rptintln!() is println!(). The
+interesting part here is how you define variables: “let <varname> =
+<value>;”</p>
+<p>Why did we not define the type of integer we want to store?</p>
+<p>This is a case where Rust silently assumes you want to use the
+default integer type usize. If you want to specify the integer type you
+want to use here you could write the following:</p>
+<pre class="rust"><code>let x:u8 = 5;
+let y:u8 = 7;
+let z = x*y;
+
+rprintln!(&quot;{x} * {y} = {z}&quot;);</code></pre>
+</div>
+<div id="strings" class="section level3">
+<h3>Strings</h3>
 <p>So what about strings?</p>
 <pre class="rust"><code>let seq = &quot;AGCT&quot;;
 let bseq = b&quot;AGCT&quot;;
 
 rprintln!(&quot;{seq}&quot;);
 rprintln!(&quot;{bseq:?}&quot;);</code></pre>
-<pre><code>## AGCT
-## [65, 71, 67, 84]</code></pre>
+<p>Strings are stored as char arrays (&amp;[u8]), but the println! macro
+already formates the Strings to be human readable. The b”<sting>”
+formats the data not as Sting but as &amp;[u8] and that needs to be
+printed using a different print statement. Quite different from R -
+or?</p>
 <p>Sequences can also be compacted using two bit per nucleotide and then
 a single u64 can contain the same info as a 32bp Sting. With being an
 integer this representation of a DNA sequence opens up possibilities
 that you do simply not have in R.</p>
 </div>
+</div>
 <div id="create-a-new-rust-program" class="section level1">
 <h1>Create a new Rust program</h1>
 <p>Rust is a compiled language and therefore interacting with it using a
-jupyter notebook or Rmd file does limit the languae a lot. Therefore it
+jupyter notebook or Rmd file does limit the language a lot. Hence it
 makes more sense to compile Rust programs and use them on the command
 line.</p>
 <p>As an example of why - I deliberately broke the integer example:</p>
@@ -560,43 +584,47 @@ line.</p>
 let y:u16 = 7;
 let z = x*y;
 
-println!(&quot;{x} * {y} = {z}&quot;);</code></pre>
-<p>I can not generate this html file here using this code, but if I
-create a stand alone ‘program’ of it it works:</p>
+rprintln!(&quot;{x} * {y} = {z}&quot;);</code></pre>
+<p>This breaks in RStudio. I can not generate the html file here using
+this code, but if I create a stand alone ‘program’ of it it works:</p>
 <pre class="bash"><code>cargo new workshop --bin</code></pre>
 <p>Open the created file “workshop/srv/main.rs” and replace the
-“println!(”Hello, world!“);” with the wrong code we had before.</p>
+“println!(”Hello, world!“);” with the broken code we had before.</p>
 <pre class="bash"><code>cd workshop
 cargo build -r</code></pre>
-<pre><code>##    Compiling workshop v0.1.0 (/home/med-sal/git_Projects/Rust_Programming_1/workshop)
+<pre><code>##    Compiling workshop v0.1.0 (D:\UncommonUsers\StefanL\Documents\git\Rust_Programming_1\workshop)
 ## error[E0308]: mismatched types
-##  --&gt; src/main.rs:4:13
+##  --&gt; src\main.rs:4:13
 ##   |
 ## 4 |   let z = x*y;
 ##   |             ^ expected `u8`, found `u16`
 ## 
 ## error[E0277]: cannot multiply `u8` by `u16`
-##  --&gt; src/main.rs:4:12
+##  --&gt; src\main.rs:4:12
 ##   |
 ## 4 |   let z = x*y;
 ##   |            ^ no implementation for `u8 * u16`
 ##   |
 ##   = help: the trait `Mul&lt;u16&gt;` is not implemented for `u8`
 ##   = help: the following other types implement trait `Mul&lt;Rhs&gt;`:
-##             &lt;&amp;&#39;a f32 as Mul&lt;f32&gt;&gt;
-##             &lt;&amp;&#39;a f64 as Mul&lt;f64&gt;&gt;
-##             &lt;&amp;&#39;a i128 as Mul&lt;i128&gt;&gt;
-##             &lt;&amp;&#39;a i16 as Mul&lt;i16&gt;&gt;
-##             &lt;&amp;&#39;a i32 as Mul&lt;i32&gt;&gt;
-##             &lt;&amp;&#39;a i64 as Mul&lt;i64&gt;&gt;
-##             &lt;&amp;&#39;a i8 as Mul&lt;i8&gt;&gt;
-##             &lt;&amp;&#39;a isize as Mul&lt;isize&gt;&gt;
-##           and 49 others
+##             &lt;&amp;&#39;a u8 as Mul&lt;u8&gt;&gt;
+##             &lt;&amp;u8 as Mul&lt;&amp;u8&gt;&gt;
+##             &lt;u8 as Mul&lt;&amp;u8&gt;&gt;
+##             &lt;u8 as Mul&gt;
 ## 
 ## Some errors have detailed explanations: E0277, E0308.
 ## For more information about an error, try `rustc --explain E0277`.
 ## error: could not compile `workshop` due to 2 previous errors</code></pre>
-<p>That was fun.</p>
+<p>Here you see the output from the Rusr compiler. Do you see the beauty
+of this? The compiler explains the error and later on even points us to
+a possible solution: We could cast the u16 to u8 in the formular.</p>
+<pre class="rust"><code>let x:u8 = 5;
+let y:u16 = 7;
+let z = x * y as u8;
+
+rprintln!(&quot;{x} * {y} = {z}&quot;);</code></pre>
+<p>But the more resonable fix here would of cause be to not define the y
+as u16 in the first place - right?</p>
 </div>
 <div id="more-complicated-error-hunting" class="section level1">
 <h1>More complicated error hunting:</h1>
@@ -637,14 +665,17 @@ function.</p>
 <h2>Problem 4</h2>
 <p>Wait - we tried to sum up the values 6, 7, 8 and 9 - that is not 10?!
 How do you fix that?</p>
-<p>This one is rather complicated, but I am sure you will be able to
-find out - right?</p>
+<p>This one is rather complicated and I recommend you to add a test case
+before you try to fix it.</p>
 </div>
 </div>
 <div id="tests-in-rust" class="section level1">
 <h1>Tests in Rust</h1>
-<p>Rust has a nice way to test scripts and libraryies: Add this to the
-script</p>
+<p>Problem 4 is a good example for a really anoying bug. To get them and
+also make sure you will not re-introduce this bug later it makes a lot
+of sense to write a test that detects the error you have in your code
+before you try to fix it:</p>
+<p>Rust has a nice way to do so: Add this to the script</p>
 <pre><code>#[cfg(test)]
 mod tests {
     use crate::sum;
@@ -659,6 +690,7 @@ mod tests {
 }</code></pre>
 <p>And now you can test your script by</p>
 <pre><code>cargo test -r</code></pre>
+<p>I hope you can find and fix the bug.</p>
 </div>
 <div id="a-short-break" class="section level1">
 <h1>A short break</h1>
@@ -678,7 +710,7 @@ self explanatory.</p>
 executable, and the lib.rs defining the library part of the package. The
 additional data.rs file contains the code for the library in this
 package and needs to be mentioned in the lib.rs file to be compiled.</p>
-<p>Let’s dig through the library.</p>
+<p>Let’s dig through the code.</p>
 <div id="start-with-the-main.rs-file." class="section level3">
 <h3>Start with the main.rs file.</h3>
 <p>This file will be compiled to be the executable. The program starts
@@ -714,48 +746,52 @@ match now.elapsed() {
 <p>Using ‘let <var_name>: <type> = <value>’ defines variables in Rust.
 The type does not need to be included in the definition if the compiler
 can identify the type itself.</p>
-<p>The ‘match’ part is the main Rust error handling functionality.</p>
-<p>The next bigger part is the reading of the command line options:
-‘now.elapsed()’ is a function that can fail and therefore returns a
+<p>The ‘match’ part is the main Rust error handling functionality. It is
+comparable to the C switch statement as it allows to match a value
+against multiple patterns and execute code based on the first matching
+pattern.</p>
+<p>The function ‘now.elapsed()’ can fail and therefore returns a
 “Result&lt;Duration, SystemTimeError&gt;” instead of only a Duration.
-This allows for the match to check if an error has occured:</p>
+This allows for the match to check if an error has occured using the two
+functions Ok and Err that both take a Result as input:</p>
 <pre><code>match &lt;statement&gt; {
     Ok(&lt;varname&gt;) =&gt; { &lt;do something with the variable&gt; },
-    Err(e) =&gt; { &lt;do something with the error&gt; }#
+    Err(e) =&gt; { &lt;do something with the error&gt; },
 };</code></pre>
 <p>I am sure you will like this ;-)</p>
-<p>The next part reads the command line options into the program:</p>
+<p><strong>The reading of the command line options:</strong></p>
 <pre><code>let opts: Opts = Opts::parse();
 let mut sep = &#39;\t&#39;;
 if &amp;opts.sep != &quot;\\t&quot;{
     println!(&quot;I set sep to {}&quot;, opts.sep );
     sep = opts.sep.chars().next().unwrap(); 
 }</code></pre>
-<p>This first parses the command line. The rest is my way to handle the
-problem that you can not give Rust a ’ as char as that can only contain
-one literal. So I have used the tab as default instead of dealing with
-this problem in any other way.</p>
-<p>This leaves us with the final ‘work’ the tool does is in these
-lines:</p>
+<p>The first line parses the command line. The rest is my way to handle
+the problem that you can not give Rust a ’ on the command line as the
+used char class can only contain one literal. So I have used the tab as
+default instead of dealing with this problem in any other way.</p>
+<p><strong>The reading and printing of the data table</strong></p>
 <pre><code>let data = Data::read_file( &amp;opts.data , sep );
 data.print();</code></pre>
-<p>This first defines a data variable using the <a href="Data::read_file" class="uri">Data::read_file</a>() function and
-then uses the <a href="Data::print" class="uri">Data::print</a>()
-function to print the contens of the data object.</p>
+<p>Quite a lot of overhead to just read a tab separated file into a
+script - or? But you have not even seen most of it as what you see here
+first defines a data variable using the <a href="Data::read_file" class="uri">Data::read_file</a>() function and then uses the <a href="Data::print" class="uri">Data::print</a>() function to print the
+contens of the data object. Therfore the real code loading the data is
+hidden in the library.</p>
 </div>
 <div id="the-lib.rs-file" class="section level3">
 <h3>The lib.rs file</h3>
 <pre><code>pub mod data;</code></pre>
-<p>Oh that is boring. It only imports the thingsfrom data.rs…</p>
+<p>Oh that is boring. It only imports the code from data.rs …</p>
 </div>
 <div id="the-data.rs-file" class="section level3">
 <h3>The data.rs file</h3>
 <p>This file now defines the Data class.</p>
 <ul>
-<li>lines 0..9 define the dependencies</li>
-<li>lines 11..19 define the data part of the class</li>
-<li>lines 22..196 code the functions</li>
-<li>lines 198..217 implement the tests for this class</li>
+<li>lines 0..5 define the dependencies</li>
+<li>lines 8..14 define the data part of the class</li>
+<li>lines 17..110 code the functions</li>
+<li>lines 112..126 implement the tests for this class</li>
 </ul>
 <p>A class in Rust is defined by creating the data structure for the
 class (struct Data {}) and then implementing functions for the class
@@ -766,22 +802,24 @@ class (struct Data {}) and then implementing functions for the class
 <p>Lets look into the new function:</p>
 <pre><code>pub fn new( rows:usize, cols:usize, data: Vec::&lt;f64&gt;, rownames: Vec::&lt;String&gt; ) -&gt; Self {
 
-    let ret = Array::from_iter(&amp;mut data.iter().cloned());
+    let ret = Array::from_iter(&amp;mut data.into_iter());
     let data = ret.into_shape([rows, cols]).unwrap();
-    let store = Array::default((rows, rows));
-    let total_energy =  vec![0.0; rows];
 
     Self {
         rows, 
         cols,
         rownames,
         data,
-        total_energy,
-        store,
     }
 }</code></pre>
-<p>Here we define the class contents and return a Self object - special
-focus on the missing ‘;’ in the end…</p>
+<p>First this function takes ownership of the data using the into_iter()
+function. This means that we can no longer access data in the main
+function. This is part of Rusts more secure memory management: Only one
+function can have access to the data.</p>
+<p>The Self{} statement creates the object from it’s parts. Here we have
+the rows, cols, the rownames from the function call and the data
+array.</p>
+<p>This is quite simple - or?</p>
 </div>
 <div id="the-read_file-function" class="section level3">
 <h3>The read_file function</h3>
@@ -789,12 +827,12 @@ focus on the missing ‘;’ in the end…</p>
 Normally you should know how much data you want to store in the objects
 as the memory needs to be requested per variable. Adding more ‘space’ to
 a variable is quite costy. Hence here we iterate over the data twice.
-Lines 47..62 read the data and ‘only’ collect the column and row
+Lines 32..52 read the data and ‘only’ collect the column and row
 counts.</p>
 <p>The ‘line’ object contains one line of the data file and the
 reader.lines() function returns a ‘Result’ - meaning it is normal that
 this function might not work. And - again - this is the common way to
-treat a Result:</p>
+treat a Result in Rust:</p>
 <pre><code>header =true;
 for mut val in line.split( sep ).collect::&lt;Vec&lt;&amp;str&gt;&gt;(){
     if header{
@@ -822,19 +860,21 @@ for mut val in line.split( sep ).collect::&lt;Vec&lt;&amp;str&gt;&gt;(){
 <p>What does this ‘mut’ mean? Rust differentiates between variables you
 only store a value in once and variables that you can modify. So
 whenever you want to asigne a value to a variable more than once you
-need to declare the variable as mut. It also does not allow access to a
-variable in more than one function.</p>
+need to declare the variable as mut.</p>
 <pre><code>for mut val in line.split( sep ).collect::&lt;Vec&lt;&amp;str&gt;&gt;()</code></pre>
 <p>Translates to: split the line by ‘sep’ and give me ownership of the
-variables you create as Vec&lt;&amp;str&gt; and iterate over the
-variables in the vector that I want to be able to modify.</p>
+variables you create as Vec&lt;&amp;str&gt;; iterate over the variables
+in the vector that I want to be able to modify.</p>
 <p>Where do we modify the value? <code>val = val.trim();</code> does
 remove whitespace from the strings. This is necessary as ” 2” can not be
 parsed as 2:<usize>. Tried that and it broke ;-) Rust also does not want
 to parse an int as float and vice versa. So therfore I need to
 differentiate between the two options here, too.</p>
-<p>I assume you can see what is going on here? What does this function
-do?</p>
+<p>The only other interesting part here is the
+<code>let v = match val.parse::&lt;f64&gt;() {</code>. This tries to
+convert the data into a f64 and if that fails it converts it to a usize.
+And if both ties fail it throws an error, but does not brak. It returns
+0.0 (a f64) by default.</p>
 <!--chapter:end:02_LoadData.Rmd-->
 </div>
 </div>
@@ -927,10 +967,9 @@ called max_it:usize and use this in a ‘for’ loop.</p>
 </div>
 <div id="lets-walk-through" class="section level1">
 <h1>Let’s walk through:</h1>
-<div id="change-the-data-type-to-the-type-we-have-in-our-read_data-the-return-value-and-add-a-way-to-select-the-initial-random-set-of-centroids." class="section level2">
-<h2>Change the data type (to the type we have in our read_data), the
+<p>Change the data type (to the type we have in our read_data), the
 return value and add a way to select the initial random set of
-centroids.</h2>
+centroids.</p>
 <pre><code>use ndarray::ArrayBase;
 use rand::Rng;
 
@@ -951,13 +990,17 @@ fn kmeans(data: &amp;ArrayBase&lt;ndarray::OwnedRepr&lt;f64&gt;, Dim&lt;[usize; 
     .
     .
 }</code></pre>
-</div>
+<p>You see the creation of the initial lables changed quite a bit from
+the AI generated
+<code>let mut centroids = data.slice(s![..k, ..]).to_owned();</code>. We
+now get exactly k random rows of the data. I got the way to copy the
+data using ChatGPT - again ;-)</p>
 <div id="should-we-have-more-functions" class="section level2">
 <h2>Should we have more functions?</h2>
-<p>Now we would select the labels - a vector stating the closest
-‘centroid’ for each row of the data. But we will need this functionality
-also in the loop. Hence I would implement a function to do that. This
-function should compare the centroids to every row of the data.</p>
+<p>Now we would calculate the closest centroid for each row of the data.
+We will need this functionality also in the loop. As we use the same
+functionality more than once I would implement a function to do that.
+This function should compare the centroids to every row of the data.</p>
 <pre><code>use ndarray::ArrayBase;
 use rand::Rng;
 
@@ -996,9 +1039,11 @@ fn kmeans(data: &amp;ArrayBase&lt;ndarray::OwnedRepr&lt;f64&gt;, Dim&lt;[usize; 
     .
 }
 </code></pre>
+<p>The asign_labels function is mainly a straight copy from the initial
+AI result.</p>
 </div>
-<div id="add-a-function-to-calculate-the-centroids" class="section level2">
-<h2>Add a function to calculate the centroids</h2>
+<div id="add-a-function-to-calculate-the-new-centroids" class="section level2">
+<h2>Add a function to calculate the new centroids</h2>
 <p>The next time we get the centroids will be more complicated. I like
 functions as one can also create specific tests for each function. AND
 THAT IS SOMETHING WE SHOULD REALLY DO!</p>
@@ -1062,18 +1107,23 @@ fn kmeans(data: &amp;ArrayBase&lt;ndarray::OwnedRepr&lt;f64&gt;, Dim&lt;[usize; 
     labels
 }
 </code></pre>
+<p>In the calculate centroids I now also give the centroids to the
+function. This way we do not need to create a temporary variable holding
+the centroids, but change the values in the variable of the kmeans
+function. That is quite slick and we should probably also have done that
+in the asigne_lables function. Would it make sense there, too?</p>
 </div>
 </div>
 <div id="and-the-testing" class="section level1">
 <h1>And the TESTING!</h1>
 <p>As we now have so many nice functions that could be tested - lets add
 some tests:</p>
-<p>Oh - now we actually neeed some data in this. :-(</p>
-<p>Let’s combine the kmeans functionality with the Data object we had as
-an example before.</p>
+<p>To be able to test this we now neeed some data in this. :-( Let’s
+combine the kmeans functionality with the Data object we had as an
+example before.</p>
 <p>Copy the read_data folder and name it kmeans. Now you need to change
-the Cargo.toml: read_data -&gt; kmeans.</p>
-<p>You could compile it and check if it is working.</p>
+the Cargo.toml: read_data to kmeans.</p>
+<p>You could compile it and check if it is still working.</p>
 <p>Add the kmeans functionality to the Data class or to the main.rs
 script. This will take some time - I will help you, but there will be no
 help in this document.</p>
@@ -1085,6 +1135,16 @@ mod tests {
     use crate::data::Data;
     use ndarray::Axis;
     use ndarray::ArrayBase;
+
+
+    #[test]
+    fn check_asign_labels() {
+        let mut data = Data::read_file( &amp;&quot;testData/CellexalVR_TestData_tsne.csv&quot;.to_string(), &#39;,&#39; );
+        let mut centroids = data.slice(s![..10, ..]).to_owned();
+        let mut labels Vec&lt;usize&gt;::with_capacity( data.nrows() );
+        data.calculate_centroids( centroids, labels )
+    }
+
 
     #[test]
     fn check_kmeans() {
@@ -1100,15 +1160,7 @@ mod tests {
 
     #[test]
     fn check_calculate_centroids() {
-        let mut data = Data::read_file( &amp;&quot;testData/CellexalVR_TestData_tsne.csv&quot;.to_string(), &#39;,&#39; );
-        data.scale();
-        
-        Data::calculate_centroids();
-    }
-
-    #[test]
-    fn check_asign_labels() {
-
+        // implement that if you like - I do not want to :-D
     }
 
 }

@@ -13,14 +13,13 @@ use std::error::Error;
 use ndarray::OwnedRepr;
 use csv::WriterBuilder;
 
+
 #[derive(Debug)]
 pub struct Data{
 	pub rows:usize, // the amount of rows
 	pub cols:usize, // the amount of cols
 	pub rownames: Vec::<String>, //rge rownames of the data - we will cluster them
 	pub data: ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>,
-	pub total_energy: Vec::<f64>, //the total energy of the gene in the given cluster
-	store: ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>,
 }
 
 
@@ -30,17 +29,12 @@ impl Data {
 		//let ret = &data as &[f64]; 
 		let ret = Array::from_iter(&mut data.iter().cloned());
 		let data = ret.into_shape([rows, cols]).unwrap();
-		//let store = BTreeMap::<usize, BTreeMap<usize, f64 >>::new();
-		let store = Array::default((rows, rows));
-		let total_energy =  vec![0.0; rows];
 
 		Self {
 			rows, 
 			cols,
 			rownames,
 			data,
-			total_energy,
-			store,
 		}
 	}
 
@@ -135,7 +129,7 @@ impl Data {
 		Array::from_iter(&mut centroids.iter().cloned()).into_shape([k, self.data.len_of(Axis(1)) ]).unwrap()
 	}
 
-	fn min_distance( &self, centroids: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>> ) -> Vec<usize>{
+	fn asign_labels( &self, centroids: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>> ) -> Vec<usize>{
 
 		let mut new_labels = Vec::<usize>::with_capacity( self.data.len_of(Axis(0)) as usize) ;
 
@@ -153,10 +147,6 @@ impl Data {
 					id = centroid_id;
 				}
 			}
-			// if data_id < 2{
-			// 	eprintln!("I got these min distances for cell {data_id}: {distances:?}");
-			// 	eprintln!("And have decided that {id} is the closest");
-			// }
 			
 			new_labels.push(id);
 		}
@@ -176,14 +166,14 @@ impl Data {
         	centroids.row_mut(i).assign(&self.data.row(sample_idx));
     	}
 
-	    let mut labels:Vec<usize> = self.min_distance(&centroids);
+	    let mut labels:Vec<usize> = self.asign_labels(&centroids);
 
 		//println!("These are my new labels: {:?}", labels);
 	    let mut it = 0;
 
 	    loop {
 	    	centroids = self.calculate_centroids(&labels, k);
-	        let new_labels = self.min_distance(&centroids);
+	        let new_labels = self.asign_labels(&centroids);
 
 	        if new_labels == labels || it == max_it{
 	        	eprintln!("finished after {it} iterations");
@@ -204,14 +194,6 @@ impl Data {
 	    }
 	    labels
 	}
-
-	// fn sum ( data: &ArrayBase<ViewRepr<&mut f64>, Dim<[usize; 1]>> ) -> f64 {
-	// 	let mut sum = 0.0;
-	// 	for val in data{
-	// 		sum += val;
-	// 	}
-	// 	sum
-	// }
 
 
 	fn min ( data: &ArrayBase<ViewRepr<&mut f64>, Dim<[usize; 1]>> ) -> f64 {
@@ -238,44 +220,9 @@ impl Data {
 			row -= Self::min( &row );
 			row /= Self::max( &row );
 		}
-		// println!("precalculate the distances between genes");
-		// for i in 0..self.rows {
-	    //     for j in i+1..self.rows {
-	    //         let dist = Data::euclidean_distance(self.data.index_axis(Axis(0), i), self.data.index_axis(Axis(0), j));
-	    //         self.store[[i,j]] = dist;
-	    //         self.store[[j,i]] = dist;
-	    //     }
-	    // }
-	    // println!("Finished");
 	}
 
-	pub fn dist( &mut self, ids:&Vec<usize> ) -> f64{
 
-		let mut sum:f64 = 0.0;
-
-		for i in ids {
-			self.total_energy[*i] = 0.0;
-		}
-
-	    for i in 0..ids.len() {
-	        for j in i+1..ids.len() {
-
-	            //let dist = Self::euclidean_distance(self.data.index_axis(Axis(0), ids[i]), self.data.index_axis(Axis(0), ids[j]));
-	            let dist = self.get_dist_from_store( ids[i], ids[j]);
-	            //self.total_energy[ids[i]] += dist;
-	            //self.total_energy[ids[j]] += dist;
-	            sum += dist;
-	            //println!("{}: {}\n{}: {}", self.rownames[ids[i]], self.data.index_axis(Axis(0),ids[i]),
-	            //	self.rownames[ids[j]], self.data.index_axis(Axis(0), ids[j]) ) ;
-	            //println!("Euclidean distance between {} and {} is {}", ids[i], ids[j], dist);
-	        }
-	    }
-	    sum // / ids.len() as f64
-	}
-
-	fn get_dist_from_store( &self, i:usize, j:usize ) -> f64{
-		self.store[[i,j]]
-	}
 
 	fn euclidean_distance(p1: ArrayView1<f64>, p2: ArrayView1<f64>) -> f64 {
 		(p1.iter().zip(p2.iter()).map(|(x, y)| (x - y).powf(2.0)).sum::<f64>()).sqrt()
@@ -313,6 +260,25 @@ mod tests {
 
     use crate::data::Data;
     use ndarray::Axis;
+    use ndarray::s;
+
+    #[test]
+    fn check_asign_labels() {
+        let data = Data::read_file( &"testData/CellexalVR_TestData_tsne.csv".to_string(), ',' );
+        let centroids = data.data.slice(s![..10, ..]).to_owned();
+        let kmeans = data.asign_labels( &centroids );
+        let mut min = usize::MAX;
+    	let mut max = usize::MIN;
+    	for k in &kmeans {
+    		if min > *k{
+    			min = *k;
+    		}
+    		if max < *k{
+    			max = *k;
+    		}
+    	}
+        assert_eq!( [min, max], [0,9] );
+    }
 
      #[test]
     fn check_kmeans() {
@@ -322,8 +288,19 @@ mod tests {
     	let kmeans = data.kmeans( 15, 15000 );
     	assert_eq!( kmeans.len(), data.data.len_of(Axis(0)) );
 
-    	let exp:Vec<usize> = vec![0; data.data.len_of(Axis(0)) ];
-    	assert_eq!( kmeans, exp );
+    	//let exp:Vec<usize> = vec![0; data.data.len_of(Axis(0)) ];
+
+    	let mut min = usize::MAX;
+    	let mut max = usize::MIN;
+    	for k in kmeans {
+    		if min > k{
+    			min = k;
+    		}
+    		if max < k{
+    			max = k;
+    		}
+    	}
+    	assert_eq!( [min , max ], [0, 14] );
     }
 
 }

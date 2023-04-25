@@ -21,6 +21,11 @@ description: "This worksdhop should teach Rust at an already quite advanced leve
 ---
 
 ```{r setup, include = FALSE}
+eval_rextender = FALSE
+if (Sys.info()["sysname"] == "Linux"){
+  eval_rextender=TRUE
+}
+
 if (! require('rextendr') ){
   remotes::install_github("extendr/rextendr")
 }

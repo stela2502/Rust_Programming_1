@@ -2,18 +2,24 @@
 
 Rust uses strong typed variables. This does mean that you need to define your variables as a specific type.
 As an example you can store integer values as u8, u16, u32, u64, u128, i8, i16, i32, i64, i128, usize or integer.
-All of these types can not be compared against each other. So if you want to create some data structures it does help to choose the same type for all data (eg. integers). 
+All of these types can not be compared against each other. So if you want to create some data structures it does help to choose the same type for all data (eg. u64). 
 The difference between the integer types are the range of values they can contain: u8 and i8 are 8 bit long whereas u128 and i128 are 128 bit long; the u types are unsigned and can not contain negative values. 
 Usize is the default integer type and is dependent on your computer type. On 64 bit computers it is the same as a u64 - but you still can not compare it directly to u64.
 
 # Examples
 
-This is code working in RStudio is you install the rextendr R package. I used this here simply to show you how variables are defined and how to break this simple logics.
+Writing this tutorial in RStudio I want to show you the pure basics of Rust:
 
+- define a variable
+- do a small calculation
 
-(Using RStudio at the moment) I now can actually look into what the variables contain using an externdr R code:
+I used this here simply to show you how variables are defined and how to break this simple logics.
 
-```{extendr}
+### Integers
+
+Using RStudio at the moment I can show you how you define a variable in Rust:
+
+```{extendr, eval=eval_rextender}
 let x = 5;
 let y = 7;
 let z = x*y;
@@ -21,11 +27,28 @@ let z = x*y;
 rprintln!("{x} * {y} = {z}");
 ```
 
-This is Rust code interpreted by R. Therefore you need to use the Rust way to define variables using "let <varname> = <value>".
+The print statement here is not Rust but specific for the R extension rextendr.
+The Rust equivalent to the rptintln!() is println!().
+The interesting part here is how you define variables: "let <varname> = <value>;"
+
+Why did we not define the type of integer we want to store?
+
+This is a case where Rust silently assumes you want to use the default integer type usize.
+If you want to specify the integer type you want to use here you could write the following:
+
+```{extendr, eval=FALSE}
+let x:u8 = 5;
+let y:u8 = 7;
+let z = x*y;
+
+rprintln!("{x} * {y} = {z}");
+```
+
+### Strings
 
 So what about strings?
 
-```{extendr}
+```{extendr, eval=eval_rextender}
 let seq = "AGCT";
 let bseq = b"AGCT";
 
@@ -33,13 +56,16 @@ rprintln!("{seq}");
 rprintln!("{bseq:?}");
 ```
 
+Strings are stored as char arrays (&[u8]), but the println! macro already formates the Strings to be human readable. The b"<sting>" formats the data not as Sting but as &[u8] and that needs to be printed using a different print statement. Quite different from R - or?
+
+
 Sequences can also be compacted using two bit per nucleotide and then a single u64 can contain the same info as a 32bp Sting.
 With being an integer this representation of a DNA sequence opens up possibilities that you do simply not have in R.
 
 # Create a new Rust program 
 
-Rust is a compiled language and therefore interacting with it using a jupyter notebook or Rmd file does limit the languae a lot.
-Therefore it makes more sense to compile Rust programs and use them on the command line. 
+Rust is a compiled language and therefore interacting with it using a jupyter notebook or Rmd file does limit the language a lot.
+Hence it makes more sense to compile Rust programs and use them on the command line. 
 
 As an example of why - I deliberately broke the integer example:
 
@@ -48,10 +74,10 @@ let x:u8 = 5;
 let y:u16 = 7;
 let z = x*y;
 
-println!("{x} * {y} = {z}");
+rprintln!("{x} * {y} = {z}");
 ```
 
-I can not generate this html file here using this code, but if I create a stand alone 'program' of it it works:
+This breaks in RStudio. I can not generate the html file here using this code, but if I create a stand alone 'program' of it it works:
 
 
 ```{r , include = FALSE, eval=FALSE}
@@ -62,14 +88,26 @@ unlink( 'workshop', recursive=TRUE )
 cargo new workshop --bin
 ```
 
-Open the created file "workshop/srv/main.rs" and replace the "println!("Hello, world!");" with the wrong code we had before.
+Open the created file "workshop/srv/main.rs" and replace the "println!("Hello, world!");" with the broken code we had before.
 
 ```{bash,  error=TRUE}
 cd workshop
 cargo build -r
 ```
 
-That was fun. 
+Here you see the output from the Rusr compiler. Do you see the beauty of this?
+The compiler explains the error and later on even points us to a possible solution:
+We could cast the u16 to u8 in the formular.
+
+```{extendr, eval=eval_rextender}
+let x:u8 = 5;
+let y:u16 = 7;
+let z = x * y as u8;
+
+rprintln!("{x} * {y} = {z}");
+```
+
+But the more resonable fix here would of cause be to not define the y as u16 in the first place - right?
 
 # More complicated error hunting:
 
@@ -112,12 +150,15 @@ No it is wrong: We need to switch the variables in the println! function.
 Wait - we tried to sum up the values 6, 7, 8 and 9 - that is not 10?!
 How do you fix that?
 
-This one is rather complicated, but I am sure you will be able to find out - right?
+This one is rather complicated and I recommend you to add a test case before you try to fix it.
 
 
 # Tests in Rust
 
-Rust has a nice way to test scripts and libraryies:
+Problem 4 is a good example for a really anoying bug. To get them and also make sure you will not re-introduce this bug later it makes a lot of sense to write a test that detects the error you have in your code before you try to fix it:
+
+
+Rust has a nice way to do so:
 Add this to the script
 
 ```
@@ -141,6 +182,7 @@ And now you can test your script by
 cargo test -r
 ```
 
+I hope you can find and fix the bug.
 
 # A short break
 
