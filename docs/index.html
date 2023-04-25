@@ -873,7 +873,7 @@ differentiate between the two options here, too.</p>
 <p>The only other interesting part here is the
 <code>let v = match val.parse::&lt;f64&gt;() {</code>. This tries to
 convert the data into a f64 and if that fails it converts it to a usize.
-And if both ties fail it throws an error, but does not brak. It returns
+And if both ties fail it throws an error, but does not break. It returns
 0.0 (a f64) by default.</p>
 <!--chapter:end:02_LoadData.Rmd-->
 </div>
@@ -1134,19 +1134,27 @@ mod tests {
 
     use crate::data::Data;
     use ndarray::Axis;
-    use ndarray::ArrayBase;
-
+    use ndarray::s;
 
     #[test]
     fn check_asign_labels() {
-        let mut data = Data::read_file( &amp;&quot;testData/CellexalVR_TestData_tsne.csv&quot;.to_string(), &#39;,&#39; );
-        let mut centroids = data.slice(s![..10, ..]).to_owned();
-        let mut labels Vec&lt;usize&gt;::with_capacity( data.nrows() );
-        data.calculate_centroids( centroids, labels )
+        let data = Data::read_file( &amp;&quot;testData/CellexalVR_TestData_tsne.csv&quot;.to_string(), &#39;,&#39; );
+        let centroids = data.data.slice(s![..10, ..]).to_owned();
+        let kmeans = data.asign_labels( &amp;centroids );
+        let mut min = usize::MAX;
+        let mut max = usize::MIN;
+        for k in &amp;kmeans {
+            if min &gt; *k{
+                min = *k;
+            }
+            if max &lt; *k{
+                max = *k;
+            }
+        }
+        assert_eq!( [min, max], [0,9] );
     }
 
-
-    #[test]
+     #[test]
     fn check_kmeans() {
 
         let mut data = Data::read_file( &amp;&quot;testData/CellexalVR_TestData_tsne.csv&quot;.to_string(), &#39;,&#39; );
@@ -1154,13 +1162,19 @@ mod tests {
         let kmeans = data.kmeans( 15, 15000 );
         assert_eq!( kmeans.len(), data.data.len_of(Axis(0)) );
 
-        let exp:Vec&lt;usize&gt; = vec![0; data.data.len_of(Axis(0)) ];
-        assert!( kmeans != exp, &quot;the kmeans values are not zero&quot; );
-    }
+        //let exp:Vec&lt;usize&gt; = vec![0; data.data.len_of(Axis(0)) ];
 
-    #[test]
-    fn check_calculate_centroids() {
-        // implement that if you like - I do not want to :-D
+        let mut min = usize::MAX;
+        let mut max = usize::MIN;
+        for k in kmeans {
+            if min &gt; k{
+                min = k;
+            }
+            if max &lt; k{
+                max = k;
+            }
+        }
+        assert_eq!( [min , max ], [0, 14] );
     }
 
 }
