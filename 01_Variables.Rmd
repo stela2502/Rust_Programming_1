@@ -63,7 +63,7 @@ Sequences can also be compacted using two bit per nucleotide and then a single u
 With being an integer this representation of a DNA sequence opens up possibilities that you do simply not have in R.
 
 ```{extendr, eval=eval_rextender}
-pub type Base = u64;
+pub type Base = u8;
 pub const A: Base = 0;
 pub const C: Base = 1;
 pub const G: Base = 2;
@@ -81,16 +81,17 @@ pub fn encode_binary(c: char) -> Base {
     }
 }
 
-let s = String::from("AGCTAGCTAGCTAGCTAGCTACGTCAGTCAGT");
+let s = String::from("AGCTAGCT");
 let t = s.as_bytes();
 let st = std::str::from_utf8(t).unwrap();
-let mut w = 0_u64;
+let mut w = 0_u8;
 for c in st.chars().rev() {
     w <<= 2;
     w |= encode_binary(c);
 }
 
 rprintln!("{w:b}");
+rprintln!("{w}");
 
 ```
 # Create a new Rust program 
