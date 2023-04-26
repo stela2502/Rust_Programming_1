@@ -63,6 +63,7 @@ Sequences can also be compacted using two bit per nucleotide and then a single u
 With being an integer this representation of a DNA sequence opens up possibilities that you do simply not have in R.
 
 ```{extendr, eval=eval_rextender}
+// logics copied from https://github.com/COMBINE-lab/kmers/
 pub type Base = u8;
 pub const A: Base = 0;
 pub const C: Base = 1;
