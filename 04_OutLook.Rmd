@@ -57,6 +57,13 @@ It helps tremendously if you try to think of 0-3 as binary numbers: #00, #01, #1
 
 Defining something using const instead of let can help make the code more reliable, efficient, and maintainable by enforcing immutability and compile-time evaluation, and by providing global scope and better type checking. For me this translates in - just do it this way - it does certainly not hurt.
 
-The 'let part' of the script defines the string we want to convert, converts the string to a bytes vector ([u8]) and this finally into a str object as this defines the used chars() function. The for loop finally converts the str into a Base integer. Can you see what it does - does the initial string really gets represented as the u8? Do 8 bp really fit into this u8?
+The 'let part' of the script defines the string we want to convert, converts the string to a bytes vector ([u8]) and this finally into a str object as this defines the used chars() function. The for loop finally converts the str into a Base integer. Can you see what it does - does the initial string really get represented in the u8? Do 8 bp really fit into this u8? And should that not throw an error?
+
+```{bash,  error=TRUE}
+cd sequences
+cargo build -r
+target/release/sequences
+```
+
 
 As said - this is not scope of this course, but I assume it will become interesting for you later on.
