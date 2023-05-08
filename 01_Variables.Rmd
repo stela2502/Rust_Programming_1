@@ -8,12 +8,10 @@ Usize is the default integer type and is dependent on your computer type. On 64 
 
 # Examples
 
-Writing this tutorial in RStudio I want to show you the pure basics of Rust:
+Here I will show you the minimal Rust programming:
 
 - define a variable
 - do a small calculation
-
-I used this here simply to show you how variables are defined and how to break this simple logics.
 
 ### Integers
 
@@ -27,13 +25,14 @@ let z = x*y;
 rprintln!("{x} * {y} = {z}");
 ```
 
-The print statement here is not Rust but specific for the R extension rextendr.
-The Rust equivalent to the rptintln!() is println!().
+Please ignore my usage of rprintln! - it is an artifact from me using Rstudio to compile this tutorial.
+The Rust macro is called - tada - println!().
+
 The interesting part here is how you define variables: "let \<varname\>:\<type\> = \<value\>;"
 
 Why did we not define the type of integer we want to store?
 
-This is a case where Rust silently assumes you want to use the default integer type usize.
+Here Rust silently assumes you want to use the default integer type usize.
 If you want to specify the integer type you want to use here you could write the following:
 
 ```{extendr, eval=eval_rextender}
@@ -43,6 +42,8 @@ let z = x*y;
 
 rprintln!("{x} * {y} = {z}");
 ```
+
+The easiest way to handle types in variable declarations is to let the Rust compiler remind you when you have forgotten the declaration, or let clippy (``cargo clippy``) remind you that giving the type is not necessary.
 
 ### Strings
 
@@ -58,43 +59,8 @@ rprintln!("{bseq:?}");
 
 Strings are (internally) stored as char arrays (&[u8]), but the println! macro already formates a \<String\> object to be human readable. The b"\<String\>" formats the data not as \<String> but as &[u8] and that needs to be printed using a different print statement, but shows the underlying numeric representation of the data. Quite different from R - or?
 
+At the end of this tutorial in the outlook I will show you a way to convert this byte sequence into a two bit version if the string.
 
-Sequences can also be compacted using two bit per nucleotide and then a single u64 can contain the same info as a 32bp String.
-With being an integer this representation of a DNA sequence opens up possibilities that you do simply not have in R.
-
-```{extendr, eval=eval_rextender}
-// logics copied from https://github.com/COMBINE-lab/kmers/
-pub type Base = u8;
-pub const A: Base = 0;
-pub const C: Base = 1;
-pub const G: Base = 2;
-pub const T: Base = 3;
-
-pub fn encode_binary(c: char) -> Base {
-    // might have to play some tricks for lookup in a const
-    // array at some point
-    match c {
-        'A' | 'a' => A,
-        'C' | 'c' => C,
-        'G' | 'g' => G,
-        'T' | 't' => T,
-        _ => panic!("cannot decode {c} into 2 bit encoding"),
-    }
-}
-
-let s = String::from("AGCTAGCT");
-let t = s.as_bytes();
-let st = std::str::from_utf8(t).unwrap();
-let mut w = 0_u8;
-for c in st.chars().rev() {
-    w <<= 2;
-    w |= encode_binary(c);
-}
-
-rprintln!("{w:b}");
-rprintln!("{w}");
-
-```
 # Create a new Rust program 
 
 Rust is a compiled language and therefore interacting with it using a jupyter notebook or Rmd file does limit the language a lot.
@@ -140,7 +106,15 @@ let z = x * y as u8;
 rprintln!("{x} * {y} = {z}");
 ```
 
-But the more resonable fix here would of cause be to not define the y as u16 in the first place - right?
+But the more reasonable fix here would of cause be to not define the y as u16 in the first place - right?
+
+
+This becomes even more beautiful if you want to know more about the error: you can simple ask Rust to explain more:
+
+```{bash, error=TRUE}
+rustc --explain E0308
+```
+
 
 # More complicated error hunting:
 
@@ -156,8 +130,9 @@ cd simple_error
 cargo build -r
 ```
 
-It is almost no fun hiding programming erros as the compiler will already tell you what to do - right?
+It is almost no fun hiding programming errors as the compiler will already tell you what to do - right?
 I think this nevertheless will be fun...
+
 
 ## Problem 1
 
@@ -178,7 +153,7 @@ Does the output make sense?
 
 ## Problem 3
 
-No it is wrong: We need to switch the variables in the println! function.
+No it is wrong: We need to switch the variables in the println! call.
 
 ## Problem 4
 
@@ -190,7 +165,7 @@ This one is rather complicated and I recommend you to add a test case before you
 
 # Tests in Rust
 
-Problem 4 is a good example for a really anoying bug. To get them and also make sure you will not re-introduce this bug later it makes a lot of sense to write a test that detects the error you have in your code before you try to fix it:
+Problem 4 is a good example for a really annoying bug. To get them and also make sure you will not re-introduce this bug later it makes a lot of sense to write a test that detects the error you have in your code before you try to fix it:
 
 
 Rust has a nice way to do so:

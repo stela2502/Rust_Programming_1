@@ -4,13 +4,10 @@ Now you know how to create a package and even know how to load numeric tables in
 But how do we interact with this table and how does a kmeans algorithm work?
 
 I could of cause explain that in detail here, but that would not help you a lot - or?
-Instead I show you how I find this info nowadays:
-
-Honestly - I almost never start anything without asking ChatGPT first.
+Instead I show you how I would find this info nowadays: using ChatGPT.
 So why not try it here, too.
 
-
-This is my conversation with ChatGPT:
+This was my conversation with ChatGPT:
 
 ```
 Hi Chatgpt. Can you tell me how to code kmeans in Rust if the data is stored in 2d ndarrays  and the rows should be clustered.
@@ -99,7 +96,7 @@ Add another variable called max_it:usize and use this in a 'for' loop.
 
 # Let's walk through:
 
-Change the data type (to the type we have in our read_data), the return value and add a way to select the initial random set of centroids.
+Change the data type to the type we have in our read_data, the return value to a Vec\<usize\> and add a way to **randomly** select the initial set of centroids.
 
 
 ```
@@ -125,23 +122,19 @@ fn kmeans(data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, k: usize) 
 }
 ```
 
-You see the creation of the initial lables changed quite a bit from the AI generated ``let mut centroids = data.slice(s![..k, ..]).to_owned();``. We now get exactly k random rows of the data.
-I got the way to copy the data using ChatGPT - again ;-)
+You see the creation of the initial labels changed quite a bit from the AI generated ``let mut centroids = data.slice(s![..k, ..]).to_owned();``. We now get exactly k **random** rows of the data.
+But the part of how to get data from the data object into the centroids object is more or less a copy from ChatGPT - at least that...
 
 
 ## Should we have more functions?
 
 Now we would calculate the closest centroid for each row of the data.
 We will need this functionality also in the loop. As we use the same functionality more than once I would implement a function to do that.
-This function should compare the centroids to every row of the data.
+This function should compare the centroids to every row of the data and I would call it assign_labels:
 
 
 ```
-use ndarray::ArrayBase;
-use rand::Rng;
-
-
-fn asign_labels(data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, centroids: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>> ) -> Vec<usize> {
+fn assign_labels(data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, centroids: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>> ) -> Vec<usize> {
     let n = data.nrows();
     let mut labels = Vec<usize>::with_capacity( n );
     
@@ -157,6 +150,13 @@ fn asign_labels(data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, cent
     }
     labels
 }
+```
+
+The assign_labels function is mainly a straight copy from the initial AI result.
+
+Let's add this logic to the main function:
+
+```
 
 fn kmeans(data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, k: usize) -> Vec<usize> {
     let n = data.nrows();
@@ -168,7 +168,7 @@ fn kmeans(data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, k: usize) 
         let sample_idx = rng.gen_range(0..n);
         centroids.row_mut(i).assign(&self.data.row(sample_idx));
     }
-    let mut labels = asign_labels( data, centroids );
+    let mut labels = assign_labels( data, centroids );
 
     .
     .
@@ -176,38 +176,15 @@ fn kmeans(data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, k: usize) 
 }
 
 ```
-
-The asign_labels function is mainly a straight copy from the initial AI result.
 
 ## Add a function to calculate the new centroids
 
 The next time we get the centroids will be more complicated.
 I like functions as one can also create specific tests for each function.
 
-But first the calculate_centroids function:
+So lets add a "calculate_centroids" function:
 
 ```
-use ndarray::ArrayBase;
-use rand::Rng;
-
-
-fn asign_labels(data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, centroids: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>> ) -> Vec<usize> {
-    let n = data.nrows();
-    let mut labels = Vec<usize>::with_capacity( n );
-    
-    for id in 0..n{
-        let mut min_distance = f64::INFINITY;
-        for j in 0..k {
-            let distance = (data.slice(s![i, ..]) - centroids.slice(s![j, ..])).norm();
-            if distance < min_distance {
-                min_distance = distance;
-                labels[[i, 0]] = j;
-            }
-        }
-    }
-    labels
-}
-
 fn calculate_centroids( data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, labels:Vec<usize>, 
             k:usize, &mut centroids: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>> ) {
 
@@ -220,7 +197,14 @@ fn calculate_centroids( data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]
         }
     } 
 }
+```
 
+In the calculate centroids I now also give the centroids object to the function. This way we do not need to create a temporary variable holding the centroids but instead change the values in the variable owned by the kmeans function. That is quite slick and we should probably also have done that in the assign_labels function. Would it even make sense there?
+
+
+Let's add this logic to the main function:
+
+```
 fn kmeans(data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, k: usize, max_it:usize) -> Vec<usize> {
     let n = data.nrows();
     let d = data.ncols();
@@ -231,12 +215,12 @@ fn kmeans(data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, k: usize, 
         let sample_idx = rng.gen_range(0..n);
         centroids.row_mut(i).assign(&self.data.row(sample_idx));
     }
-    let mut labels = asign_labels( data, centroids );
+    let mut labels = assign_labels( data, centroids );
     let mut new_labels:Vec<usize>;
 
     for it in 0..max_it{
         calculate_centroids( data, labels, k, centroids );
-        new_labels = asign_labels( data, centroids );
+        new_labels = assign_labels( data, centroids );
         if new_labels == labels{
             print("converged after {it} itherations");
             break;
@@ -247,9 +231,6 @@ fn kmeans(data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, k: usize, 
 }
 
 ```
-
-In the calculate centroids I now also give the centroids to the function. This way we do not need to create a temporary variable holding the centroids, but change the values in the variable of the kmeans function. That is quite slick and we should probably also have done that in the asigne_lables function. Would it make sense there, too?
-
 
 # And the TESTING!
 
@@ -280,10 +261,10 @@ mod tests {
     use ndarray::s;
 
     #[test]
-    fn check_asign_labels() {
+    fn check_assign_labels() {
         let data = Data::read_file( &"testData/CellexalVR_TestData_tsne.csv".to_string(), ',' );
         let centroids = data.data.slice(s![..10, ..]).to_owned();
-        let kmeans = data.asign_labels( &centroids );
+        let kmeans = data.assign_labels( &centroids );
         let mut min = usize::MAX;
         let mut max = usize::MIN;
         for k in &kmeans {
@@ -326,6 +307,16 @@ mod tests {
 
 Add these tests BEFORE you implement the functions. This way you have a simple test to check if it does work ;-)
 
+Please try to integrate the kmeans function into the read_data crate.
+
+You can either add the kmeans logics to the main.rs script or you augment the read_table Data class.
+
+This will be a hands on training session. And not a too simple one. Please do not look into the kmeans_example folder.
+This would ruin the exercise for you.
+
+Instead copy the read_data folder from the github repo and rename the project to kmeans_<your_name> in the Cargo.toml.
+Think about where you want to add the functions and do it. Compile and dig through the compiler errors.
+Or you try to clean out the problems first.
 
 ### Compile and test the kmeans program
 
@@ -334,12 +325,14 @@ cd kmeans_example
 cargo build -r
 target/release/kmeans -h
 ```
-
-
 ```{bash,  error=TRUE}
 cd kmeans_example
 target/release/kmeans -d testData/CellexalVR_TestData_tsne.csv -c 15 -s ','
 ```
+
+Ok that did not take long. But how fast would R do that?
+
+Did this make sense? Let's plot this data using R:
 
 ```{r}
 clusters = read.delim('kmeans_example/testData/Clustering.txt', sep=",", row.names=1, header=F)
@@ -350,8 +343,69 @@ head(data)
 plot( data[,1:2], col=rainbow(15)[clusters[,1]+1], pch=16)
 ```
 
+But what about speed? Can we compare that to R? First check R like we did it in the R programming 1:
 
-And at the end - does the R outperform Rust? I assume kmeans is coded in C anyhow. But what about loading the data?
+```{r}
+
+# from ChatGPT:
+
+e.dist <- function(x, y) {
+  sqrt(sum((x - y)^2))
+}
+
+
+kmeans_r = function( yyc, k=8 ){
+    n = nrow(yyc)
+    centroids <- yyc[sample(1:n, k, replace=F),] # make a vector of random clusters.
+
+    dists <- matrix(0, nrow = n, ncol = k) # make an empty matrix to fill with distances.
+
+    clusters <- NULL # make an empty variable to catch the clusters in the loop below
+    old_clusters <- rep(0, n)
+    for(iteration in 1:100){ # 100 iterations
+
+      for(gene in 1:n){
+        for(cl in 1:k){
+          dists[gene, cl] <- e.dist(yyc[gene,], centroids[cl,]) # for each gene calculate the distance to each centroid (cl).
+        }
+      }
+
+      clusters <- apply(dists, 1, which.min) # assign a  cluster according to which centroid is nearest
+      if ( all.equal(old_clusters, clusters) ==TRUE ){
+        return (clusters);
+      }
+      old_clusters =clusters
+
+      for(cl in 1:k){
+        centroids[cl,] <- apply(yyc[which(clusters == cl),], 2, mean) # define new centroids.
+      }
+    }
+    clusters
+}
+```
+
+Let's time that call:
+
+
+```{r}
+start_time <- Sys.time()
+#data = read.delim( 'kmeans_example/testData/CellexalVR_TestData_tsne.csv', sep=",", row.names=1)
+#data = read.delim( './Spellman_Yeast_Cell_Cycle.tsv', sep=",", row.names=1)
+df <- data.frame(age = c(18, 21, 22, 24, 26, 26, 27, 30, 31, 35, 39, 40, 41, 42, 44, 46, 47, 48, 49, 54),
+    spend = c(10, 11, 22, 15, 12, 13, 14, 33, 39, 37, 44, 27, 29, 20, 28, 21, 30, 31, 23, 24)
+)
+cl = kmeans_r( df, 3)
+end_time <- Sys.time()
+print(end_time - start_time)
+plot( df[,1:2], col=rainbow(15)[cl], pch=16)
+```
+
+
+OK even this tiny example (20 rows) took more time than what the Rust program needed for a much bigger matrix (1654 rows).
+So this simple R code is far slower than the Rust code. But what about the kmeans implementation in R? This should be highly optimized.
+
+Does the R internal kmeans (likely programmed in C) outperform Rust?
+
 
 ```{r}
 start_time <- Sys.time()
@@ -361,3 +415,9 @@ end_time <- Sys.time()
 print(end_time - start_time)
 plot( data[,1:2], col=rainbow(15)[cl$cluster], pch=16)
 ```
+
+# Take home message:
+
+Rust totally outclasses simple R code and ends up in the same speed range if optimized (c or c++) code is used in R.
+
+But trust me - you do not want to write optimized c or c++ code!
