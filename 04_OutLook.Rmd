@@ -27,19 +27,19 @@ pub fn encode_binary(c: char) -> Base {
 }
 
 let s = String::from("AGCTACGT");
-println!("How Rust can look at the sequence {s}");
+rprintln!("How Rust can look at the sequence {s}");
 let t = s.as_bytes();
-println!("as_bytes {t:?}");
+rprintln!("as_bytes {t:?}");
 let st = std::str::from_utf8(t).unwrap();
-println!("as str {st:?}");
+rprintln!("as str {st:?}");
 
 let mut w = 0_u8;
 for c in st.chars().rev() {
   w <<= 2;
   w |= encode_binary(c);
 }
-println!("and as single u8 integer {w}");
-println!("which looks like this in binary form: {w:b}");
+rprintln!("and as single u8 integer {w}");
+rprintln!("which looks like this in binary form: {w:b}");
 
 let faster =std::str::from_utf8( b"AGCTAGCT").unwrap();
 
@@ -47,7 +47,7 @@ for c in faster.chars().rev() {
   w <<= 2;
   w |= encode_binary(c);
 }
-println!("and now in one line from string to binary: {w:b}");
+rprintln!("and now in one line from string to binary: {w:b}");
 ```
 
 
