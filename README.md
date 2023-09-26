@@ -9,6 +9,9 @@ The course can be found here: https://stela2502.github.io/Rust_Programming_1/
 It is very tailored to bioinformaticians.
 
 
-# how to 'build' this:
+# how to 'build' the documentation:
 
 The easiest way is to install RStudio, clone this repo and open the RData here.
+
+For all here included Rust packages as well as the html file itself you need Rust installed on your system.
+The Rust code run by RStudio does not work on Windows. 

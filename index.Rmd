@@ -84,3 +84,6 @@ knitr::write_bib(c(
 
 ```{r child = '03_Kmeans.Rmd'}
 ```
+
+```{r child = '04_Outlook.Rmd'}
+```

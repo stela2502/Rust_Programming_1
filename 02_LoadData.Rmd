@@ -5,9 +5,9 @@ Hence I'll tell you how I finally managed to get data into Rust - just copy past
 
 The git repo contains a folder 'read_data' which is a simple Rust package.
 Looking into it you see a Cargo.toml. This file describes your package and is comparable to the R DESCRIPTION file.
-Here you define the package and the dependancies. Just look into the example. It should be self explanatory.
+Here you define the package and the dependencies. Just look into the example. It should be self explanatory.
 
-The src folder contains the code files with main.rs defining the executable, and the lib.rs defining the library part of the package.
+The src folder contains the code files with main.rs defining the executable and the lib.rs defining the library part of the package.
 The additional data.rs file contains the code for the library in this package and needs to be mentioned in the lib.rs file to be compiled.
 
 
@@ -27,7 +27,7 @@ In the main function most of the code is a timer functionality that I do think i
 ```
 let now = SystemTime::now();
 
-...
+// do the stuff
 
 match now.elapsed() {
     Ok(elapsed) => {
@@ -55,7 +55,7 @@ The type does not need to be included in the definition if the compiler can iden
 The 'match' part is the main Rust error handling functionality. It is comparable to the C switch statement as it allows to match a value against multiple patterns and execute code based on the first matching pattern. 
 
 The function 'now.elapsed()' can fail and therefore returns a "Result\<Duration, SystemTimeError\>" instead of only a Duration.
-This allows for the match to check if an error has occured using the two functions Ok and Err that both take a Result as input:
+This allows for the match to check if an error has occurred using the two functions Ok and Err that both take a Result as input:
 
 ```
 match <statement> {
@@ -89,7 +89,7 @@ data.print();
 ```
 
 Quite a lot of overhead to just read a tab separated file into a script - or?
-But you have not even seen most of it as what you see here first defines a data variable using the Data::read_file() function and then uses the Data::print() function to print the contens of the data object. Therfore the real code loading the data is hidden in the library.
+But you have not even seen most of it as what you see here first defines a data variable using the Data::read_file() function and then uses the Data::print() function to print the contents of the data object. Therefore the real code loading the data is hidden in the library.
 
 ### The lib.rs file
 
@@ -112,7 +112,7 @@ A class in Rust is defined by creating the data structure for the class (struct 
 Functions can be defined with 
 
 ```
-fn <function name> (<variables>) -> <return value> { 
+<accessability> fn <function name> (<variables>) -> <return value> { 
 	<code> 
 } 
 ```
@@ -134,11 +134,9 @@ pub fn new( rows:usize, cols:usize, data: Vec::<f64>, rownames: Vec::<String> ) 
 }
 ```
 
-Wait 'pub'? Yes if you define a function (or variable) as pub code from outside the class can call that function or access that variable. If you forget that the function or variable are private to the class.
+First this function can be called from outside the class - it is public. And this is what it does: it takes ownership of the data using the into_iter() function. This means that we can no longer access data in the main function. This is part of Rusts more secure memory management: Only one function can have access to the data. We then create an Array object from this data (from_iter) and finally we re-format the data into a two dimensional table (into_shape). The ending unwrap() call handles any possible error for the reshape process. 
 
-First this function takes ownership of the data using the into_iter() function. This means that we can no longer access data in the main function. This is part of Rusts more secure memory management: Only one function can have access to the data. We then create an Array object from this data. And finally we re-format the data into a two dimensional table.
-
-The Self{} statement creates the object from it's parts. Here we have the rows, cols, the rownames (from the function call) and the data array. 
+The Self{} statement at the end creates the object from it's parts. Here we have the rows, cols, the rownames (from the function call) and the data array. This line is not ending with a ';'. Here the compiler instead returns the Self object. 
 
 This is quite simple - or?
 
@@ -193,8 +191,8 @@ for line in reader.lines() {
 }
 ```
 
-What does this 'mut' mean? Rust differentiates between variables you only store a value in once and variables that you can modify.
-So whenever you want to asigne a value to a variable more than once you need to declare the variable as mut.
+What does this 'mut' mean? Rust differentiates between variables you only store a value in and variables that you can modify.
+So whenever you want to assign a value to a variable more than once you need to declare the variable as mut.
 
 ```
 for mut val in line.split( sep ).collect::<Vec<&str>>()
@@ -203,9 +201,8 @@ for mut val in line.split( sep ).collect::<Vec<&str>>()
 Translates to: split the line by 'sep' and give me ownership of the variables you create as Vec\<&str\>; iterate over the variables in the vector and I want to be able to modify these values.
 
 Where do we modify the value? ``val = val.trim();`` does remove whitespace from the strings. This is necessary as " 2" can not be parsed as 2:\<usize\>. Tried that and it broke ;-)
-Rust also does not want to parse an int as float and vice versa. So therfore I need to differentiate between the two options here, too. 
-
-The only other interesting part here is the ``let v = match val.parse::<f64>() {``. This tries to convert the data into a f64 and if that fails it converts it to a usize. And if both ties fail it throws an error, but does not break. It returns 0.0 (a f64) by default.
+Rust also does not want to parse an int as float and vice versa. So therefore I need to differentiate between the two options here, too. 
+The only other interesting part here is the ``let v = match val.parse::<f64>() {``. This tries to convert the data into a f64 and if that fails it converts it to a usize. And if both ties fail it throws an error, but does not break - so more like a warning. In this case it returns 0.0 (a f64).
 
 
 ### And now try the tool:
@@ -223,3 +220,5 @@ And we can even run the test with some data file:
 cd read_data
 target/release/read_data -d testData/Spellman_Yeast_Cell_Cycle.tsv
 ```
+
+Now we know how to load a numeric table into Rust. Let's use that!

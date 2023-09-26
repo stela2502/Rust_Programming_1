@@ -129,7 +129,7 @@ impl Data {
 		Array::from_iter(&mut centroids.iter().cloned()).into_shape([k, self.data.len_of(Axis(1)) ]).unwrap()
 	}
 
-	fn asign_labels( &self, centroids: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>> ) -> Vec<usize>{
+	fn assign_labels( &self, centroids: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>> ) -> Vec<usize>{
 
 		let mut new_labels = Vec::<usize>::with_capacity( self.data.len_of(Axis(0)) as usize) ;
 
@@ -166,14 +166,14 @@ impl Data {
         	centroids.row_mut(i).assign(&self.data.row(sample_idx));
     	}
 
-	    let mut labels:Vec<usize> = self.asign_labels(&centroids);
+	    let mut labels:Vec<usize> = self.assign_labels(&centroids);
 
 		//println!("These are my new labels: {:?}", labels);
 	    let mut it = 0;
 
 	    loop {
 	    	centroids = self.calculate_centroids(&labels, k);
-	        let new_labels = self.asign_labels(&centroids);
+	        let new_labels = self.assign_labels(&centroids);
 
 	        if new_labels == labels || it == max_it{
 	        	eprintln!("finished after {it} iterations");
@@ -263,10 +263,10 @@ mod tests {
     use ndarray::s;
 
     #[test]
-    fn check_asign_labels() {
+    fn check_assign_labels() {
         let data = Data::read_file( &"testData/CellexalVR_TestData_tsne.csv".to_string(), ',' );
         let centroids = data.data.slice(s![..10, ..]).to_owned();
-        let kmeans = data.asign_labels( &centroids );
+        let kmeans = data.assign_labels( &centroids );
         let mut min = usize::MAX;
     	let mut max = usize::MIN;
     	for k in &kmeans {

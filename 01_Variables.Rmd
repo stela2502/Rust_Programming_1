@@ -24,12 +24,10 @@ What I found most important for my work is to try to understand code I have not 
 
 # Examples
 
-Writing this tutorial in RStudio I want to show you the pure basics of Rust:
+Here I will show you the minimal Rust programming:
 
 - define a variable
 - do a small calculation
-
-I used this here simply to show you how variables are defined and how to break this simple logics.
 
 ### Integers
 
@@ -45,11 +43,13 @@ rprintln!("{x} * {y} = {z}");
 
 The print statement here is not Rust but specific for the R extension rextendr.
 The Rust equivalent to the rprintln!() is println!().
+Please ignore my usage of rprintln! - it is an artifact from me using Rstudio to compile this tutorial.
+
 The interesting part here is how you define variables: "let \<varname\>:\<type\> = \<value\>;"
 
 Why did we not define the type of integer we want to store?
 
-This is a case where Rust silently assumes you want to use the default integer type usize.
+Here Rust silently assumes you want to use the default integer type usize.
 If you want to specify the integer type you want to use here you could write the following:
 
 ```{extendr, eval=eval_rextender}
@@ -78,10 +78,7 @@ let z = x*y;
 rprintln!("{x} * {y} = {z}");
 ```
 
-This breaks in RStudio. I can not generate the html file here using this code, but if I create a stand alone 'program' of it it works:
-
-
-Get rid of the previous folder:
+Compiling this in RStudio breaks the html generation and I can not show the error here using this code. But if I create a stand alone 'program' of it it works:
 
 ```{r , include = FALSE, eval=FALSE}
 unlink( 'workshop', recursive=TRUE )
@@ -103,75 +100,13 @@ cargo build -r
 ```
 
 Here you see the output from the Rust compiler. Do you see the beauty of this?
-The compiler explains the error and later on even points us to a possible solution:
-We could cast the u16 to u8 in the formular.
+The compiler explains the error. The most reasonable fix here would of cause be to not define the y as u16 in the first place - right?
 
-```{extendr, eval=eval_rextender}
-let x:u8 = 5;
-let y:u16 = 7;
-let z = x * y as u8;
+This becomes even more beautiful if you want to know more about the error: you can simple ask Rust to explain more:
 
-rprintln!("{x} * {y} = {z}");
+```{bash, error=TRUE}
+rustc --explain E0308
 ```
-
-But the more resonable fix here would of cause be to not define the y as u16 in the first place - right?
-
-
-### Strings
-
-So what about strings?
-
-```{extendr, eval=eval_rextender}
-let seq = "AGCT";
-let bseq = b"AGCT";
-
-rprintln!("{seq}");
-rprintln!("{bseq:?}");
-```
-
-Strings are (internally) stored as char arrays (&[u8]), but the println! macro already formates a \<String\> object to be human readable. The b"\<String\>" formats the data not as \<String> but as &[u8] and that needs to be printed using a different print statement, but shows the underlying numeric representation of the data. Quite different from R - or?
-
-
-Sequences can also be compacted using two bit per nucleotide and then a single u64 can contain the same info as a 32bp String.
-With being an integer this representation of a DNA sequence opens up possibilities that you do simply not have in R.
-
-I have choosen the kind of string we all likely work most with: DNA.
-And as I am currently trying to implement a genome matcher I was thinking of compacting DNA sequences and make them 'numeric'. I am of cause not the first to have this problem and therefore here is some code from the combine lab:
-
-```{extendr, eval=eval_rextender}
-// logics copied from https://github.com/COMBINE-lab/kmers/
-pub type Base = u8;
-pub const A: Base = 0;
-pub const C: Base = 1;
-pub const G: Base = 2;
-pub const T: Base = 3;
-
-pub fn encode_binary(c: char) -> Base {
-    // might have to play some tricks for lookup in a const
-    // array at some point
-    match c {
-        'A' | 'a' => A,
-        'C' | 'c' => C,
-        'G' | 'g' => G,
-        'T' | 't' => T,
-        _ => panic!("cannot decode {c} into 2 bit encoding"),
-    }
-}
-
-let s = String::from("AGCTAGCT");
-let bytes  = s.as_bytes();
-let mut w = 0_u8;
-for c in bytes.iter().rev() {
-    w <<= 2;
-    w |= encode_binary(c);
-}
-
-println!("{w:b}");
-println!("{w}");
-
-```
-
-This function is meant as an additional feature here. You do not need to completely understand that. I totally recommend you to let ChatGPT explain that function to you ;-). And I hope you can use something like that later on.
 
 
 # More complicated error hunting:
@@ -188,8 +123,9 @@ cd simple_error
 cargo build -r
 ```
 
-It is almost no fun hiding programming erros as the compiler will already tell you what to do - right?
+It is almost no fun hiding programming errors as the compiler will already tell you what to do - right?
 I think this nevertheless will be fun...
+
 
 ## Problem 1
 
@@ -210,7 +146,7 @@ Does the output make sense?
 
 ## Problem 3
 
-No it is wrong: We need to switch the variables in the println! function.
+No it is wrong: We need to switch the variables in the println! call.
 
 ## Problem 4
 
@@ -222,7 +158,7 @@ This one is rather complicated and I recommend you to add a test case before you
 
 # Tests in Rust
 
-Problem 4 is a good example for a really anoying bug. To get them and also make sure you will not re-introduce this bug later it makes a lot of sense to write a test that detects the error you have in your code before you try to fix it:
+Problem 4 is a good example for a really annoying bug. To get them and also make sure you will not re-introduce this bug later it makes a lot of sense to write a test that detects the error you have in your code before you try to fix it:
 
 
 Rust has a nice way to do so:
