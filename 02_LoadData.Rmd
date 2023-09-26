@@ -134,6 +134,8 @@ pub fn new( rows:usize, cols:usize, data: Vec::<f64>, rownames: Vec::<String> ) 
 }
 ```
 
+Wait 'pub'? Yes if you define a function (or variable) as pub code from outside the class can call that function or access that variable. If you forget that the function or variable are private to the class.
+
 First this function takes ownership of the data using the into_iter() function. This means that we can no longer access data in the main function. This is part of Rusts more secure memory management: Only one function can have access to the data. We then create an Array object from this data. And finally we re-format the data into a two dimensional table.
 
 The Self{} statement creates the object from it's parts. Here we have the rows, cols, the rownames (from the function call) and the data array. 
@@ -144,7 +146,7 @@ This is quite simple - or?
 
 The read_file function shows a general problem of compiled languages.
 Normally you should know how much data you want to store in the objects as the memory needs to be requested per variable.
-Adding more 'space' to a variable is quite costy. Hence here we iterate over the data twice. Lines 32..52 read the data and 'only' collect the column and row counts.
+Adding more 'space' to a variable is quite costly. Hence we iterate over the data twice. Lines 32..52 read the data and 'only' collect the column and row counts.
 
 The 'line' object contains one line of the data file and the reader.lines() function returns a 'Result' - meaning it is normal that this function might not work.
 And - again - this is the common way to treat a Result in Rust:
@@ -198,7 +200,7 @@ So whenever you want to asigne a value to a variable more than once you need to 
 for mut val in line.split( sep ).collect::<Vec<&str>>()
 ```
 
-Translates to: split the line by 'sep' and give me ownership of the variables you create as Vec\<&str\>; iterate over the variables in the vector that I want to be able to modify.
+Translates to: split the line by 'sep' and give me ownership of the variables you create as Vec\<&str\>; iterate over the variables in the vector and I want to be able to modify these values.
 
 Where do we modify the value? ``val = val.trim();`` does remove whitespace from the strings. This is necessary as " 2" can not be parsed as 2:\<usize\>. Tried that and it broke ;-)
 Rust also does not want to parse an int as float and vice versa. So therfore I need to differentiate between the two options here, too. 

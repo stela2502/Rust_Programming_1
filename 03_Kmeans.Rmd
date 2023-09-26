@@ -361,3 +361,7 @@ end_time <- Sys.time()
 print(end_time - start_time)
 plot( data[,1:2], col=rainbow(15)[cl$cluster], pch=16)
 ```
+
+
+Congratulations - you have made it! Hope this was and will be useful for you!
+
