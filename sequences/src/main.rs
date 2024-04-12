@@ -39,7 +39,7 @@ fn main() {
     println!("and as single u8 integer {w}");
     println!("which looks like this in binary form: {w:b}");
 
-    let faster =std::str::from_utf8( b"AGCTAGCT").unwrap();
+    let faster = std::str::from_utf8( b"AGCTAGCT").unwrap();
 
     for c in faster.chars().rev() {
         w <<= 2;

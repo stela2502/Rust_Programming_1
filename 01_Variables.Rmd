@@ -96,7 +96,7 @@ Compile the new program:
 
 ```{bash,  error=TRUE}
 cd workshop
-cargo build -r
+cargo build -r 2>&1 | sed -r "s/\x1B\[[0-9;]*[mGKH]//g"
 ```
 
 Here you see the output from the Rust compiler. Do you see the beauty of this?
@@ -120,7 +120,7 @@ Download (clone) the repo using git ``git clone https://github.com/stela2502/Rus
 There you run:
 ```{bash,  error=TRUE}
 cd simple_error
-cargo build -r
+cargo build -r  2>&1 | sed -r "s/\x1B\[[0-9;]*[mGKH]//g"
 ```
 
 It is almost no fun hiding programming errors as the compiler will already tell you what to do - right?
@@ -138,7 +138,7 @@ We do not have a 'data' variable in the sum function. Here the data is called 'v
 Now the code compiles:
 ```{bash,  error=TRUE}
 cd simple_fixed
-cargo build -r
+cargo build -r 2>&1 | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"
 target/release/simple_error
 ```
 
@@ -183,7 +183,7 @@ And now you can test your script by
 
 ```{bash,  error=TRUE}
 cd simple_fixed
-cargo test -r
+cargo test -r 2>&1 | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"
 ```
 
 I hope you can find and fix the bug.

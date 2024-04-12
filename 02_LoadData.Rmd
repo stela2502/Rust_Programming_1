@@ -210,7 +210,7 @@ The only other interesting part here is the ``let v = match val.parse::<f64>() {
 
 ```{bash,  error=TRUE}
 cd read_data
-cargo build -r
+cargo build -r 2>&1 | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"
 target/release/read_data -h
 ```
 
