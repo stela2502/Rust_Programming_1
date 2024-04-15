@@ -70,7 +70,7 @@ Hence it makes more sense to compile Rust programs and use them on the command l
 
 As an example of why - I deliberately broke the integer example:
 
-```
+```{rust}
 let x:u8 = 5;
 let y:u16 = 7;
 let z = x*y;
@@ -164,7 +164,7 @@ Problem 4 is a good example for a really annoying bug. To get them and also make
 Rust has a nice way to do so:
 Add this to the script
 
-```
+```{rust}
 #[cfg(test)]
 mod tests {
     use crate::sum;

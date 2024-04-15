@@ -26,7 +26,7 @@ fn kmeans(data: &Array2<f64>, k: usize) -> Array2<f64> {
 
     loop {
         let mut new_labels = Array2::zeros((n, 1));
-        for i in 0..n {
+         for i in 0..n {
             let mut min_distance = f64::INFINITY;
             for j in 0..k {
                 let distance = (data.slice(s![i, ..]) - centroids.slice(s![j, ..])).norm();
@@ -83,7 +83,7 @@ This function should rather return the cluster identities for each row as a Vec\
 The next step in the kmeans algorithm is to select a random set of initial 'centromers'. This step is totally missing in the AI function.
 To select a random set of starting rows we need a random number generator. In Rust this works like that:
 
-```
+```{rust}
 use rand::Rng;
 let mut rng = rand::thread_rng();
 rng.gen_range(0..100); // gives a random number in this range.
@@ -99,7 +99,7 @@ Add another variable called max_it:usize and use this in a 'for' loop.
 Change the data type to the type we have in our read_data, the return value to a Vec\<usize\> and add a way to **randomly** select the initial set of centroids.
 
 
-```
+```{rust}
 use ndarray::ArrayBase;
 use rand::Rng;
 
@@ -137,7 +137,7 @@ We will need this functionality also in the loop. As we use the same functionali
 This function should compare the centroids to every row of the data and I would call it assign_labels:
 
 
-```
+```{rust}
 fn assign_labels(data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, centroids: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>> ) -> Vec<usize> {
     let n = data.nrows();
     let mut labels = Vec<usize>::with_capacity( n );
@@ -162,7 +162,7 @@ If the distance we get is smaller than all others before we assign the centroid 
 
 Let's add this logic to the main function:
 
-```
+```{rust}
 
 fn kmeans(data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, k: usize) -> Vec<usize> {
     let n = data.nrows();
@@ -190,13 +190,15 @@ I like functions as one can also create specific tests for each function.
 
 So lets add a "calculate_centroids" function:
 
-```
+```{rust}
 fn calculate_centroids( data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, labels:Vec<usize>, 
             k:usize, &mut centroids: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>> ) {
 
     for j in 0..k {
-        let mask = labels.iter().enumerate().filter(|(_, &l)| l == j )
-            .map(|(i, _)| i).collect::<Vec<_>>();
+        let mask = labels.iter().enumerate()
+            .filter(|(_, &l)| l == j )
+            .map(|(i, _)| i)
+            .collect::<Vec<_>>();
         let cluster_data = data.select(Axis(0), &mask);
         if !cluster_data.is_empty() {
             centroids.slice_mut(s![j, ..]).assign(&cluster_data.mean_axis(Axis(0)).unwrap());
@@ -207,29 +209,36 @@ fn calculate_centroids( data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]
 
 Oops - that one is complicated!
 
-`` let mask = labels.iter().enumerate().filter(|(_, &l)| l == j ).map(|(i, _)| i).collect::<Vec<_>>(); `` What a monster!
+```{rust}
+let mask = labels.iter().enumerate()
+  .filter(|(_, &l)| l == j )
+  .map(|(i, _)| i)
+  .collect::<Vec<_>>(); 
+```
+
 
 Let's break it down:
 
-`` let mask = <...>.collect::<Vec<_>>(); `` This defines what we will get into the mask variable, A vector of _ (a generic place holder) and in our case here _ is defined in the map step that collects the ids of the rows in cluster j - so here we would expect a Vec::\<usize\> in the end.
+* `` labels.iter().enumerate() `` 
+This creates the data we work on: The ids and variables in the label vector (``.iter()``: values and ``.enumerate()``: with the ids ).
 
-`` ... labels.iter().enumerate() ... `` This creates the data we work on: The ids and variables in the label vector (.iter -> values and .enumerate -> with the ids ).
+* ``filter(|(_, &l)| l == j )`` 
+This filter only uses the second variable, the label id and checks it against the cluster 'j'. Only labels that have this id reach the next step.
 
-`` ... filter(|(_, &l)| l == j ) ... `` This filter only uses the second variable, the label id and checks it against the cluster 'j'. Only labels that have this id reach the next step.
+* ``map(|(i, _)| i) `` 
+Here we only get the id and value of rows that are in cluster 'j'. So we simply need to 'cut out' the row id here and ignore the value.
 
-`` ... map(|(i, _)| i) ... `` Here we only get the id and value of rows that are in cluster 'j'. So we simply need to 'cut out' the row id here and ignore the value.
 
 So the mask variable in the end contains the row_ids that are in cluster j.
 
 We collect this data into a new let cluster_data and if that is not empty we calculate the new centroid as the mean of this cluster_data. Simple?
-
 
 In the calculate centroids I now also give the centroids object to the function. This way we do not need to create a temporary variable holding the centroids but instead change the values in the variable owned by the kmeans function. That is quite slick and we should probably also have done that in the assign_labels function. Would it even make sense there?
 
 
 Let's add this logic to the main function:
 
-```
+```{rust}
 fn kmeans(data: &ArrayBase<ndarray::OwnedRepr<f64>, Dim<[usize; 2]>>, k: usize, max_it:usize) -> Vec<usize> {
     let n = data.nrows();
     let d = data.ncols();
@@ -276,7 +285,7 @@ This will take some time - I will help you, but there will be no help in this do
 We go on with the testing here:
 
 
-```
+```{rust}
 
 #[cfg(test)]
 mod tests {
@@ -347,7 +356,8 @@ Or you try to clean out the problems first.
 
 ```{bash,  error=TRUE}
 cd kmeans_example
-cargo build -r 2>&1 | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"
+cargo build -r
+#cargo build -r 2>&1 | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"
 target/release/kmeans -h
 ```
 ```{bash,  error=TRUE}
