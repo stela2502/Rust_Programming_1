@@ -84,7 +84,7 @@ Compiling this in RStudio breaks the html generation and I can not show the erro
 unlink( 'workshop', recursive=TRUE )
 ```
 
-And then create an empty class structure:
+First - create an empty class structure:
 
 ```{bash, eval=FALSE}
 cargo new workshop --bin
@@ -92,7 +92,7 @@ cargo new workshop --bin
 
 Open the created file "workshop/srv/main.rs" and replace the "println!("Hello, world!");" with the broken code we had before.
 
-Compile the new program:
+Compile the new program (normally you state ``cargo build -r`` I had to add here as the jupyter notebook could not handle the terminal color commands):
 
 ```{bash,  error=TRUE}
 cd workshop
@@ -115,7 +115,7 @@ The bugs so far were not very complicated - right? Now we need to dig deeper and
 
 Lets look in the simple_problem folder in [this github repo](https://github.com/stela2502/Rust_Programming_1).
 
-Download (clone) the repo using git ``git clone https://github.com/stela2502/Rust_Programming_1``. Open the folder 'simple_error' in your IDE and open a terminal and cd into this folder.
+Download (clone) the repo using git ``git clone https://github.com/stela2502/Rust_Programming_1``. Open the folder 'simple_error' in your IDE and open a terminal and cd into the cloned folder.
 
 There you run:
 ```{bash,  error=TRUE}

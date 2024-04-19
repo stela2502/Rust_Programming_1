@@ -76,14 +76,14 @@ knitr::write_bib(c(
 ), 'packages.bib')
 ```
 
-```{r child = '01_Variables.Rmd'}
-```
-
-```{r child = '02_LoadData.Rmd'}
-```
-
-```{r child = '03_Kmeans.Rmd'}
-```
-
-```{r child = '04_Outlook.Rmd'}
-```
+#```{r child = '01_Variables.Rmd'}
+#```
+#
+#```{r child = '02_LoadData.Rmd'}
+#```
+#
+#```{r child = '03_Kmeans.Rmd'}
+#```
+#
+#```{r child = '04_Outlook.Rmd'}
+#```
