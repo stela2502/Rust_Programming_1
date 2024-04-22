@@ -1,0 +1,82 @@
+# Implement the DNA mapper
+
+Each of the coding examples have been one Rust project so far. But in this project we possibly need more binaries than only one.
+We will also create more library files and therfore we need to separate the binaries from the library.
+In Rust you do that like this:
+
+
+```{bash, eval=FALSE}
+cargo new my_mapper 2>&1 | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"
+cd my_mapper
+mkdir src/bin
+touch src/lib.rs
+mv src/main.rs src/bin/first_executable.rs
+
+find ./
+```
+
+```
+##      Created binary (application) `my_mapper` package
+## ./
+## ./src
+## ./src/main.rs
+## ./src/bin
+## ./src/bin/first_executable.rs
+## ./src/lib.rs
+## ./Cargo.toml
+```
+
+Each file in the bin folder will code for a new binary.
+
+Now we need one class that stores the target sequences as 2bit, one that makes them searchable and one or two that implement the glue between the two. 
+Why three or four classes? Trust me we will need it!
+
+
+## The DNA data class
+
+Before we have learned how to convert a DNA string into a u8 integer. But we can only store 4bp in one u8. How do we store longer sequences?
+A vector of u8s? 
+
+Which functions does that class need?
+
+1. We definitely need an encode() function that converts a UTF8 &[u8] (that is what a str internally is in Rust) into our own 2bit version of Vec::\<u8\>.
+2. The matching DNA fragmanets likely do only match a sub sequence of the here store DNA sequence -> we need a slice() function. 
+3. Reading 2bit encoded DNA sequences is a pain. We likely need a decode and a print function (e.g. for debug).
+4. Our other class needs some keys it can use to map to this DNA sequence - we need to get an iterator implemented here that can create these keys.
+
+With this fourth function you now see why we wanted two classes. If we have two classes - one for the matcher and one for the DNA data we can use the DNA data class for both the target sequences as well as for the reads. Nice.
+
+Should we call it DnaData hence forth?
+
+## And our mapper class?
+
+That thing needs to store our indexed DNA fragments and have a fast way to find them.
+
+First the data structures we need: 
+
+1. The indexed DNA fragments are of class DnaData and we only need to fill that once - so and array/vector would be ok.
+2. Each key from the indexed DNA fragments needs to link to the DNA fragment the key came from and the position on the fragment that the key did start. Oh - do we possibly need three classes? An additional IndexElement?
+
+There are multiple ways to define the data structure for the index keys. But if we remember that we (1) have not defined the keys and (2) each of our DNA fragments is internally stored as integer - why not use a vector, too?
+
+Each x bp DNA fragment would be seen as an integer and represent the array position the data is stored in.
+
+Lets see - 4bp (8 bits) only code for 256 different entries. 256 * 8 byte is no memory at all, but there is not enough variability here.
+16bp (32 bit) - that codes for 4.294.967.296 differnt DNA strings - quite cool, but does that fit into memory? (2 ** 32 * 8byte /1024 /1024 / 1024 = 32 Gb). Would likely fit, but that seams too excessive. So what about a u16 - 8bp or 16 bit: 2 ** 32 * 8byte /1024 /1024 / 1024 = 0.5 Gb for 32.768 different 8bp DNA strings.
+
+So that seams to be the best option nowadays? This defines the iterator's return value: u16.
+
+## And finally the IndexElement
+
+Why do we need that? The Mapper needs to store information on all the different u16 indices. What it needs is a storage for the id of the DnaData and the startposition on that data. And as all of these 8bp DNA regions can of cause also occur multiple times in the genome we need to store multiple of these (dna_data_id, start) touples. This touple would be our fourth class.
+We likely need a length function and Rust also wants an is_empty to that.
+
+There will be more when we actually implement this mapper.
+
+# Final Remarks
+
+I think implementing a mapper here would likely blow the scope. But you get the idea - right? 
+
+I have a GenomeMapper class in my Rustody library (https://github.com/stela2502/Rustody) that more or less implements this logics. You can take a look and use that if you need it.
+
+The Rustody project also used Traits (Rust way of inheritance) and a folder structure for the library itself. I hope you learn something reading it - if needed. 

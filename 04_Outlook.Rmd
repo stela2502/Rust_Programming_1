@@ -1,9 +1,11 @@
-# Outlook
+# How would we now implements a DNA mapper like STAR?
 
-A short to very short outlook, describing how nucleotide sequences can be handled in Rust.
-This is not meant to be understood right now, but I wanted to give you an impression of what Rust can do with DNA sequences:
+Fist we would need to see how nucleotide sequences can be handled in Rust.
+For this we define that one single DNA nucleotide can either be 'A', 'C', 'G' or 'T' - in other words 4 different options.
+So - we could also code for them using 2 bits 'A' = 00, 'C' = 01, 'G' = 10, 'T' = 11.
 
-Sequences can also be compacted using two bit per nucleotide and then a single u64 can contain the same info as a 32bp String.
+Each char tahes a u8 to store it internally. That is 8 bits wide and as our very limited DNA code can be coded in only 2 bits this should be 4x as efficient - a single u8 can contain the same info as a 4bp DNA code.
+
 With being an integer this representation of a DNA sequence opens up possibilities that you do simply not have in R.
 
 ```{extendr, eval=eval_rextender}
@@ -51,7 +53,7 @@ What does this do?
 In the beginning it defined a Base variable of class type. This variable is later used to define which kind of data you can process using this logic (e.g. 8, 16, 32 or even 64 bp of sequence info). The next four lines define which sequences should be converted into which 'number'.
 It helps tremendously if you try to think of 0-3 as binary numbers: #00, #01, #10 and #11.
 
-Defining something using const instead of let can help make the code more reliable, efficient, and maintainable by enforcing immutability and compile-time evaluation, and by providing global scope and better type checking. For me this translates to - just do it this way - it does certainly not hurt.
+"Defining something using const instead of let can help make the code more reliable, efficient, and maintainable by enforcing immutability and compile-time evaluation, and by providing global scope and better type checking." For me this translates to - just do it this way - it does certainly not hurt.
 
 The 'let part' of the script defines the string we want to convert, converts the string to a bytes vector ([u8]). The for loop finally converts the str into a Base integer. Can you see what it does - does the initial string really get represented in the u8? Do 8 bp really fit into this u8? And should that not throw an error?
 
@@ -64,5 +66,4 @@ target/release/sequences
 
 As said - this is not scope of this course, but I assume it will become interesting for you later on.
 
-
-Congratulations - you have made it! Hope this was and will be useful for you!
+So what about we try to implement a mapper using this knowledge? This will likely be a horrible experience for you :-D 
