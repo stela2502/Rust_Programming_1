@@ -451,8 +451,6 @@ plot( data[,1:2], col=rainbow(15)[cl$cluster], pch=16)
 ```
 
 
-
-=======
 # Take home message:
 
 Rust totally outclasses simple R code and ends up in the same speed range if optimized (c or c++) code is used in R.
